@@ -4,18 +4,9 @@ from collections.abc import Mapping
 
 import httpx
 
-from ._base_client import (
-    DEFAULT_BASE_URL as _DEFAULT_BASE_URL,
-)
-from ._base_client import (
-    DEFAULT_TIMEOUT as _DEFAULT_TIMEOUT,
-)
-from ._base_client import (
-    _BaseClient,
-)
+from ._base_client import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, _BaseClient
 
-DEFAULT_BASE_URL = _DEFAULT_BASE_URL
-DEFAULT_TIMEOUT = _DEFAULT_TIMEOUT
+__all__ = ["DEFAULT_BASE_URL", "DEFAULT_TIMEOUT", "AsyncEngramClient"]
 
 
 class AsyncEngramClient(_BaseClient):

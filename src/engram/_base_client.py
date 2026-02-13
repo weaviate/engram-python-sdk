@@ -31,13 +31,13 @@ class _BaseClient:
             raise ValidationError("Timeout must be greater than 0.")
 
         normalized_base_url = base_url.rstrip("/")
-        header_overrides = dict(headers) if headers is not None else {}
+        header_overrides = headers if headers is not None else {}
         default_headers = _build_headers(api_key=api_key, header_overrides=header_overrides)
 
         self._config = ClientConfig(
             base_url=normalized_base_url,
             timeout=timeout,
-            headers=dict(default_headers),
+            headers=default_headers,
             api_key=api_key,
         )
 
@@ -60,7 +60,7 @@ class _BaseClient:
     ) -> httpx.Request:
         merged_headers = self.default_headers
         if headers:
-            merged_headers.update(dict(headers))
+            merged_headers.update(headers)
 
         return self._http_client.build_request(
             method=method,
@@ -83,7 +83,7 @@ def _build_headers(
     }
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
-    headers.update(dict(header_overrides))
+    headers.update(header_overrides)
     return headers
 
 
