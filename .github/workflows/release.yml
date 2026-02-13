@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: uv sync --all-groups --frozen
+
+      - name: Verify tag matches pyproject version
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          import tomllib
+          from pathlib import Path
+
+          pyproject = tomllib.loads(Path("pyproject.toml").read_text())
+          project_version = pyproject["project"]["version"]
+          tag_version = os.environ["GITHUB_REF_NAME"].removeprefix("v")
+
+          if project_version != tag_version:
+              print(f"Version mismatch: pyproject={project_version} tag={tag_version}")
+              sys.exit(1)
+
+          print(f"Version check passed: {project_version}")
+          PY
+
+      - name: Build package
+        run: uv build --no-sources
+
+      - name: Publish to PyPI (OIDC)
+        uses: pypa/gh-action-pypi-publish@release/v1
