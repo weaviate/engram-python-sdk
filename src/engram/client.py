@@ -1,18 +1,23 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import Any
 
 import httpx
 
 from ._base_client import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, _BaseClient
+from ._resources import Memories, Runs
+from .errors import ConnectionError as EngramConnectionError
 
 __all__ = ["DEFAULT_BASE_URL", "DEFAULT_TIMEOUT", "EngramClient"]
 
 
 class EngramClient(_BaseClient):
-    """Synchronous Engram client"""
+    """Synchronous Engram client."""
 
     _http_client: httpx.Client
+    memories: Memories
+    runs: Runs
 
     def __init__(
         self,
@@ -31,6 +36,23 @@ class EngramClient(_BaseClient):
         )
         self._owns_http_client = http_client is None
         self._http_client = http_client or httpx.Client(timeout=timeout)
+        self.memories = Memories(self)
+        self.runs = Runs(self)
+
+    def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: Mapping[str, Any] | None = None,
+        json: Any | None = None,
+    ) -> dict[str, Any]:
+        request = self.build_request(method, path, params=params, json=json)
+        try:
+            response = self._http_client.send(request)
+        except httpx.ConnectError as exc:
+            raise EngramConnectionError(str(exc)) from exc
+        return self._process_response(response)
 
     def close(self) -> None:
         if self._owns_http_client:

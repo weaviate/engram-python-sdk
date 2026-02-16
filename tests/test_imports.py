@@ -1,11 +1,21 @@
 def test_public_imports() -> None:
     import engram
-    from engram import (
+    from engram import (  # noqa: F401
         APIError,
         AsyncEngramClient,
-        AuthError,
+        AuthenticationError,
+        CommittedOperation,
+        CommittedOperations,
+        ConnectionError,
         EngramClient,
         EngramError,
+        Memory,
+        NotFoundError,
+        PreExtractedContent,
+        RetrievalConfig,
+        Run,
+        RunStatus,
+        SearchResults,
         ValidationError,
     )
 
@@ -13,15 +23,34 @@ def test_public_imports() -> None:
     assert isinstance(AsyncEngramClient, type)
     assert isinstance(EngramError, type)
     assert isinstance(APIError, type)
-    assert isinstance(AuthError, type)
+    assert isinstance(AuthenticationError, type)
+    assert isinstance(NotFoundError, type)
     assert isinstance(ValidationError, type)
+    assert isinstance(Memory, type)
+    assert isinstance(Run, type)
+    assert isinstance(RunStatus, type)
+    assert isinstance(SearchResults, type)
+    assert isinstance(PreExtractedContent, type)
+    assert isinstance(RetrievalConfig, type)
+    assert isinstance(CommittedOperation, type)
+    assert isinstance(CommittedOperations, type)
 
     expected_exports = {
         "APIError",
         "AsyncEngramClient",
-        "AuthError",
+        "AuthenticationError",
+        "CommittedOperation",
+        "CommittedOperations",
+        "ConnectionError",
         "EngramClient",
         "EngramError",
+        "Memory",
+        "NotFoundError",
+        "PreExtractedContent",
+        "RetrievalConfig",
+        "Run",
+        "RunStatus",
+        "SearchResults",
         "ValidationError",
         "__version__",
     }

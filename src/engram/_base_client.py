@@ -5,7 +5,7 @@ from typing import Any
 
 import httpx
 
-from .errors import ValidationError
+from .errors import APIError, AuthenticationError, NotFoundError, ValidationError
 from .types import ClientConfig
 from .version import __version__
 
@@ -31,8 +31,7 @@ class _BaseClient:
             raise ValidationError("Timeout must be greater than 0.")
 
         normalized_base_url = base_url.rstrip("/")
-        header_overrides = headers if headers is not None else {}
-        default_headers = _build_headers(api_key=api_key, header_overrides=header_overrides)
+        default_headers = _build_headers(api_key=api_key, header_overrides=headers or {})
 
         self._config = ClientConfig(
             base_url=normalized_base_url,
@@ -49,6 +48,27 @@ class _BaseClient:
     def default_headers(self) -> dict[str, str]:
         return dict(self._config.headers)
 
+    def _process_response(self, response: httpx.Response) -> dict[str, Any]:
+        data = _safe_json(response)
+
+        if response.status_code == 401:
+            detail = _extract_detail(data, "Authentication failed")
+            raise AuthenticationError(detail, status_code=401, body=data)
+
+        if response.status_code == 404:
+            detail = _extract_detail(data, "Not found")
+            raise NotFoundError(detail, status_code=404, body=data)
+
+        if response.status_code >= 400:
+            detail = _extract_detail(data, response.reason_phrase)
+            raise APIError(detail, status_code=response.status_code, body=data)
+
+        if data is None:
+            return {}
+        if isinstance(data, dict):
+            return data
+        return {"data": data}
+
     def build_request(
         self,
         method: str,
@@ -62,13 +82,33 @@ class _BaseClient:
         if headers:
             merged_headers.update(headers)
 
+        clean_path = path.lstrip("/")
+        url = f"{self._config.base_url}/{clean_path}" if clean_path else self._config.base_url
+
         return self._http_client.build_request(
             method=method,
-            url=_build_url(self._config.base_url, path),
+            url=url,
             headers=merged_headers,
             params=params,
             json=json,
         )
+
+
+def _extract_detail(data: Any, fallback: str) -> str:
+    if isinstance(data, dict):
+        return str(data.get("detail", fallback))
+    if data:
+        return str(data)
+    return fallback
+
+
+def _safe_json(response: httpx.Response) -> Any:
+    if not response.content:
+        return None
+    try:
+        return response.json()
+    except Exception:
+        return None
 
 
 def _build_headers(
@@ -85,10 +125,3 @@ def _build_headers(
         headers["Authorization"] = f"Bearer {api_key}"
     headers.update(header_overrides)
     return headers
-
-
-def _build_url(base_url: str, path: str) -> str:
-    clean_path = path.lstrip("/")
-    if not clean_path:
-        return base_url
-    return f"{base_url}/{clean_path}"

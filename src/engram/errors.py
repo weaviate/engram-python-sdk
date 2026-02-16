@@ -22,9 +22,17 @@ class APIError(EngramError):
         self.body = body
 
 
-class AuthError(APIError):
-    """Raised when authentication fails."""
+class AuthenticationError(APIError):
+    """Raised when authentication fails (401)."""
+
+
+class NotFoundError(APIError):
+    """Raised when a resource is not found (404)."""
 
 
 class ValidationError(EngramError):
     """Raised when configuration or request input is invalid."""
+
+
+class ConnectionError(EngramError):
+    """Raised when a connection to the Engram server fails."""
