@@ -6,8 +6,8 @@ from typing import Any
 import httpx
 
 from ._base_client import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, _BaseClient
+from ._http import AsyncHttpTransport
 from ._resources import AsyncMemories, AsyncRuns
-from .errors import ConnectionError as EngramConnectionError
 
 __all__ = ["DEFAULT_BASE_URL", "DEFAULT_TIMEOUT", "AsyncEngramClient"]
 
@@ -15,7 +15,7 @@ __all__ = ["DEFAULT_BASE_URL", "DEFAULT_TIMEOUT", "AsyncEngramClient"]
 class AsyncEngramClient(_BaseClient):
     """Asynchronous Engram client."""
 
-    _http_client: httpx.AsyncClient
+    _transport: AsyncHttpTransport
     memories: AsyncMemories
     runs: AsyncRuns
 
@@ -35,28 +35,27 @@ class AsyncEngramClient(_BaseClient):
             timeout=timeout,
         )
         self._owns_http_client = http_client is None
-        self._http_client = http_client or httpx.AsyncClient(timeout=timeout)
-        self.memories = AsyncMemories(self)
-        self.runs = AsyncRuns(self)
+        http = http_client or httpx.AsyncClient(timeout=timeout)
+        self._transport = AsyncHttpTransport(self._config, http)
+        self.memories = AsyncMemories(self._transport)
+        self.runs = AsyncRuns(self._transport)
 
-    async def _request(
+    def build_request(
         self,
         method: str,
         path: str,
         *,
+        headers: Mapping[str, str] | None = None,
         params: Mapping[str, Any] | None = None,
         json: Any | None = None,
-    ) -> dict[str, Any]:
-        request = self.build_request(method, path, params=params, json=json)
-        try:
-            response = await self._http_client.send(request)
-        except httpx.ConnectError as exc:
-            raise EngramConnectionError(str(exc)) from exc
-        return self._process_response(response)
+    ) -> httpx.Request:
+        return self._transport.build_request(
+            method, path, headers=headers, params=params, json=json
+        )
 
     async def aclose(self) -> None:
         if self._owns_http_client:
-            await self._http_client.aclose()
+            await self._transport._http_client.aclose()
 
     async def __aenter__(self) -> AsyncEngramClient:
         return self

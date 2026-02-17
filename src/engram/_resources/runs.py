@@ -2,14 +2,11 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING
 
+from .._http import AsyncHttpTransport, HttpTransport
 from .._models import RunStatus
 from .._serialization import parse_run_status
-
-if TYPE_CHECKING:
-    from ..async_client import AsyncEngramClient
-    from ..client import EngramClient
+from ..errors import EngramTimeoutError
 
 _RUNS_PATH = "/v1/runs"
 
@@ -23,13 +20,11 @@ def _run_path(run_id: str) -> str:
 class Runs:
     """Sync sub-resource for run operations: client.runs.*"""
 
-    _client: EngramClient
-
-    def __init__(self, client: EngramClient) -> None:
-        self._client = client
+    def __init__(self, transport: HttpTransport) -> None:
+        self._transport = transport
 
     def get(self, run_id: str) -> RunStatus:
-        data = self._client._request("GET", _run_path(run_id))
+        data = self._transport.request("GET", _run_path(run_id))
         return parse_run_status(data)
 
     def wait(
@@ -45,20 +40,18 @@ class Runs:
             if status.status in _TERMINAL_STATUSES:
                 return status
             if time.monotonic() + interval > deadline:
-                return status
+                raise EngramTimeoutError(run_id, timeout)
             time.sleep(interval)
 
 
 class AsyncRuns:
     """Async sub-resource for run operations: client.runs.*"""
 
-    _client: AsyncEngramClient
-
-    def __init__(self, client: AsyncEngramClient) -> None:
-        self._client = client
+    def __init__(self, transport: AsyncHttpTransport) -> None:
+        self._transport = transport
 
     async def get(self, run_id: str) -> RunStatus:
-        data = await self._client._request("GET", _run_path(run_id))
+        data = await self._transport.request("GET", _run_path(run_id))
         return parse_run_status(data)
 
     async def wait(
@@ -75,5 +68,5 @@ class AsyncRuns:
             if status.status in _TERMINAL_STATUSES:
                 return status
             if loop.time() + interval > deadline:
-                return status
+                raise EngramTimeoutError(run_id, timeout)
             await asyncio.sleep(interval)

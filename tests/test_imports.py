@@ -9,6 +9,7 @@ def test_public_imports() -> None:
         ConnectionError,
         EngramClient,
         EngramError,
+        EngramTimeoutError,
         Memory,
         NotFoundError,
         PreExtractedContent,
@@ -26,6 +27,7 @@ def test_public_imports() -> None:
     assert isinstance(AuthenticationError, type)
     assert isinstance(NotFoundError, type)
     assert isinstance(ValidationError, type)
+    assert isinstance(EngramTimeoutError, type)
     assert isinstance(Memory, type)
     assert isinstance(Run, type)
     assert isinstance(RunStatus, type)
@@ -44,6 +46,7 @@ def test_public_imports() -> None:
         "ConnectionError",
         "EngramClient",
         "EngramError",
+        "EngramTimeoutError",
         "Memory",
         "NotFoundError",
         "PreExtractedContent",

@@ -6,8 +6,8 @@ from typing import Any
 import httpx
 
 from ._base_client import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, _BaseClient
+from ._http import HttpTransport
 from ._resources import Memories, Runs
-from .errors import ConnectionError as EngramConnectionError
 
 __all__ = ["DEFAULT_BASE_URL", "DEFAULT_TIMEOUT", "EngramClient"]
 
@@ -15,7 +15,7 @@ __all__ = ["DEFAULT_BASE_URL", "DEFAULT_TIMEOUT", "EngramClient"]
 class EngramClient(_BaseClient):
     """Synchronous Engram client."""
 
-    _http_client: httpx.Client
+    _transport: HttpTransport
     memories: Memories
     runs: Runs
 
@@ -35,28 +35,27 @@ class EngramClient(_BaseClient):
             timeout=timeout,
         )
         self._owns_http_client = http_client is None
-        self._http_client = http_client or httpx.Client(timeout=timeout)
-        self.memories = Memories(self)
-        self.runs = Runs(self)
+        http = http_client or httpx.Client(timeout=timeout)
+        self._transport = HttpTransport(self._config, http)
+        self.memories = Memories(self._transport)
+        self.runs = Runs(self._transport)
 
-    def _request(
+    def build_request(
         self,
         method: str,
         path: str,
         *,
+        headers: Mapping[str, str] | None = None,
         params: Mapping[str, Any] | None = None,
         json: Any | None = None,
-    ) -> dict[str, Any]:
-        request = self.build_request(method, path, params=params, json=json)
-        try:
-            response = self._http_client.send(request)
-        except httpx.ConnectError as exc:
-            raise EngramConnectionError(str(exc)) from exc
-        return self._process_response(response)
+    ) -> httpx.Request:
+        return self._transport.build_request(
+            method, path, headers=headers, params=params, json=json
+        )
 
     def close(self) -> None:
         if self._owns_http_client:
-            self._http_client.close()
+            self._transport._http_client.close()
 
     def __enter__(self) -> EngramClient:
         return self

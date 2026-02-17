@@ -15,6 +15,7 @@ from .errors import (
     AuthenticationError,
     ConnectionError,
     EngramError,
+    EngramTimeoutError,
     NotFoundError,
     ValidationError,
 )
@@ -29,6 +30,7 @@ __all__ = [
     "ConnectionError",
     "EngramClient",
     "EngramError",
+    "EngramTimeoutError",
     "Memory",
     "NotFoundError",
     "PreExtractedContent",

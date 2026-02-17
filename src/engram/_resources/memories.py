@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
+from .._http import AsyncHttpTransport, HttpTransport
 from .._models import AddContent, Memory, RetrievalConfig, Run, SearchResults
 from .._serialization import (
     build_add_body,
@@ -11,10 +10,6 @@ from .._serialization import (
     parse_run,
     parse_search_results,
 )
-
-if TYPE_CHECKING:
-    from ..async_client import AsyncEngramClient
-    from ..client import EngramClient
 
 _MEMORIES_PATH = "/v1/memories"
 _MEMORIES_SEARCH_PATH = "/v1/memories/search"
@@ -27,10 +22,8 @@ def _memory_path(memory_id: str) -> str:
 class Memories:
     """Sync sub-resource for memory operations: client.memories.*"""
 
-    _client: EngramClient
-
-    def __init__(self, client: EngramClient) -> None:
-        self._client = client
+    def __init__(self, transport: HttpTransport) -> None:
+        self._transport = transport
 
     def add(
         self,
@@ -46,7 +39,7 @@ class Memories:
             conversation_id=conversation_id,
             group=group,
         )
-        data = self._client._request("POST", _MEMORIES_PATH, json=body)
+        data = self._transport.request("POST", _MEMORIES_PATH, json=body)
         return parse_run(data)
 
     def get(
@@ -64,7 +57,7 @@ class Memories:
             conversation_id=conversation_id,
             group=group,
         )
-        data = self._client._request("GET", _memory_path(memory_id), params=params)
+        data = self._transport.request("GET", _memory_path(memory_id), params=params)
         return parse_memory(data)
 
     def delete(
@@ -82,7 +75,7 @@ class Memories:
             conversation_id=conversation_id,
             group=group,
         )
-        self._client._request("DELETE", _memory_path(memory_id), params=params)
+        self._transport.request("DELETE", _memory_path(memory_id), params=params)
 
     def search(
         self,
@@ -102,17 +95,15 @@ class Memories:
             group=group,
             retrieval_config=retrieval_config or RetrievalConfig(),
         )
-        data = self._client._request("POST", _MEMORIES_SEARCH_PATH, json=body)
+        data = self._transport.request("POST", _MEMORIES_SEARCH_PATH, json=body)
         return parse_search_results(data)
 
 
 class AsyncMemories:
     """Async sub-resource for memory operations: client.memories.*"""
 
-    _client: AsyncEngramClient
-
-    def __init__(self, client: AsyncEngramClient) -> None:
-        self._client = client
+    def __init__(self, transport: AsyncHttpTransport) -> None:
+        self._transport = transport
 
     async def add(
         self,
@@ -128,7 +119,7 @@ class AsyncMemories:
             conversation_id=conversation_id,
             group=group,
         )
-        data = await self._client._request("POST", _MEMORIES_PATH, json=body)
+        data = await self._transport.request("POST", _MEMORIES_PATH, json=body)
         return parse_run(data)
 
     async def get(
@@ -146,7 +137,7 @@ class AsyncMemories:
             conversation_id=conversation_id,
             group=group,
         )
-        data = await self._client._request("GET", _memory_path(memory_id), params=params)
+        data = await self._transport.request("GET", _memory_path(memory_id), params=params)
         return parse_memory(data)
 
     async def delete(
@@ -164,7 +155,7 @@ class AsyncMemories:
             conversation_id=conversation_id,
             group=group,
         )
-        await self._client._request("DELETE", _memory_path(memory_id), params=params)
+        await self._transport.request("DELETE", _memory_path(memory_id), params=params)
 
     async def search(
         self,
@@ -184,5 +175,5 @@ class AsyncMemories:
             group=group,
             retrieval_config=retrieval_config or RetrievalConfig(),
         )
-        data = await self._client._request("POST", _MEMORIES_SEARCH_PATH, json=body)
+        data = await self._transport.request("POST", _MEMORIES_SEARCH_PATH, json=body)
         return parse_search_results(data)
