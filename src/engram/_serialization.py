@@ -124,7 +124,7 @@ def parse_memory(data: dict[str, Any]) -> Memory:
 
 def parse_search_results(data: dict[str, Any]) -> SearchResults:
     return SearchResults(
-        memories=[parse_memory(m) for m in data["memories"]],
+        memories=[parse_memory(m["Body"]) for m in data["memories"]],
         total=data["total"],
     )
 
