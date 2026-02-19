@@ -36,7 +36,7 @@ async def test_async_client_custom_config_and_header_merging() -> None:
         assert client.default_headers["Authorization"] == "Bearer test-key"
         assert client.default_headers["X-Custom"] == "from-client"
 
-        request = client.build_request(
+        request = client._transport.build_request(
             "GET",
             "v1/items",
             headers={"X-Custom": "from-request", "X-Request": "value"},
@@ -195,7 +195,7 @@ async def test_delete_memory() -> None:
 @pytest.mark.asyncio
 async def test_search_memories() -> None:
     response_body: dict[str, Any] = {
-        "memories": [SAMPLE_MEMORY_RESPONSE],
+        "memories": [{"Body": SAMPLE_MEMORY_RESPONSE}],
         "total": 1,
     }
     client = _make_client(body=response_body)
@@ -208,8 +208,8 @@ async def test_search_memories() -> None:
 async def test_search_memories_iterable() -> None:
     response_body: dict[str, Any] = {
         "memories": [
-            SAMPLE_MEMORY_RESPONSE,
-            {**SAMPLE_MEMORY_RESPONSE, "id": "m2", "score": 0.85},
+            {"Body": SAMPLE_MEMORY_RESPONSE},
+            {"Body": {**SAMPLE_MEMORY_RESPONSE, "id": "m2", "score": 0.85}},
         ],
         "total": 2,
     }

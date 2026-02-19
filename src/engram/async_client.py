@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any
 
 import httpx
 
@@ -34,28 +33,12 @@ class AsyncEngramClient(_BaseClient):
             headers=headers,
             timeout=timeout,
         )
-        self._owns_http_client = http_client is None
-        http = http_client or httpx.AsyncClient(timeout=timeout)
-        self._transport = AsyncHttpTransport(self._config, http)
+        self._transport = AsyncHttpTransport(self._config, http_client)
         self.memories = AsyncMemories(self._transport)
         self.runs = AsyncRuns(self._transport)
 
-    def build_request(
-        self,
-        method: str,
-        path: str,
-        *,
-        headers: Mapping[str, str] | None = None,
-        params: Mapping[str, Any] | None = None,
-        json: Any | None = None,
-    ) -> httpx.Request:
-        return self._transport.build_request(
-            method, path, headers=headers, params=params, json=json
-        )
-
     async def aclose(self) -> None:
-        if self._owns_http_client:
-            await self._transport._http_client.aclose()
+        await self._transport.close()
 
     async def __aenter__(self) -> AsyncEngramClient:
         return self

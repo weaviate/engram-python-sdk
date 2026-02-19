@@ -13,9 +13,14 @@ from .types import ClientConfig
 class HttpTransport:
     """Wraps a sync httpx.Client and handles request building and response processing."""
 
-    def __init__(self, config: ClientConfig, http_client: httpx.Client) -> None:
+    def __init__(self, config: ClientConfig, http_client: httpx.Client | None = None) -> None:
         self._config = config
-        self._http_client = http_client
+        self._owns_http_client = http_client is None
+        self._http_client = http_client or httpx.Client(timeout=config.timeout)
+
+    def close(self) -> None:
+        if self._owns_http_client:
+            self._http_client.close()
 
     def request(
         self,
@@ -58,9 +63,14 @@ class HttpTransport:
 class AsyncHttpTransport:
     """Wraps an async httpx.AsyncClient and handles request building and response processing."""
 
-    def __init__(self, config: ClientConfig, http_client: httpx.AsyncClient) -> None:
+    def __init__(self, config: ClientConfig, http_client: httpx.AsyncClient | None = None) -> None:
         self._config = config
-        self._http_client = http_client
+        self._owns_http_client = http_client is None
+        self._http_client = http_client or httpx.AsyncClient(timeout=config.timeout)
+
+    async def close(self) -> None:
+        if self._owns_http_client:
+            await self._http_client.aclose()
 
     async def request(
         self,
