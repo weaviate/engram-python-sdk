@@ -10,7 +10,6 @@ jobs:
     name: Build and Publish
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
     steps:
       - name: Checkout
@@ -49,11 +48,23 @@ jobs:
               print(f"Version mismatch: pyproject={project_version} tag={tag_version}")
               sys.exit(1)
 
+          # Also verify version.py is in sync
+          version_file = Path("src/engram/version.py")
+          namespace: dict = {}
+          exec(version_file.read_text(), namespace)
+          module_version = namespace["__version__"]
+
+          if module_version != project_version:
+              print(f"Version mismatch: version.py={module_version} pyproject={project_version}")
+              sys.exit(1)
+
           print(f"Version check passed: {project_version}")
           PY
 
       - name: Build package
         run: uv build --no-sources
 
-      - name: Publish to PyPI (OIDC)
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish to PyPI
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: uv publish

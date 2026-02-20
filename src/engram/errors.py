@@ -22,9 +22,25 @@ class APIError(EngramError):
         self.body = body
 
 
-class AuthError(APIError):
-    """Raised when authentication fails."""
+class AuthenticationError(APIError):
+    """Raised when authentication fails (401)."""
+
+    def __init__(self, message: str, *, body: object = None) -> None:
+        super().__init__(message, status_code=401, body=body)
 
 
 class ValidationError(EngramError):
     """Raised when configuration or request input is invalid."""
+
+
+class ConnectionError(EngramError):
+    """Raised when a connection to the Engram server fails."""
+
+
+class EngramTimeoutError(EngramError):
+    """Raised when a run does not reach a terminal status within the timeout."""
+
+    def __init__(self, run_id: str, timeout: float) -> None:
+        super().__init__(f"Run {run_id!r} did not reach a terminal status within {timeout}s")
+        self.run_id = run_id
+        self.timeout = timeout
