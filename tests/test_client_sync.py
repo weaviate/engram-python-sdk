@@ -4,19 +4,20 @@ from typing import Any
 import httpx
 import pytest
 
+from engram._http import HttpTransport
 from engram._models import PreExtractedContent, RetrievalConfig
 from engram.client import DEFAULT_BASE_URL, EngramClient
-from engram.errors import APIError, AuthenticationError, NotFoundError, ValidationError
+from engram.errors import APIError, AuthenticationError, ValidationError
 
 
 def test_client_defaults() -> None:
-    client = EngramClient()
+    client = EngramClient(api_key="test-key")
     try:
         assert client.config.base_url == DEFAULT_BASE_URL
         assert client.config.timeout == 30.0
         assert client.default_headers["Accept"] == "application/json"
         assert client.default_headers["Content-Type"] == "application/json"
-        assert "Authorization" not in client.default_headers
+        assert client.default_headers["Authorization"] == "Bearer test-key"
     finally:
         client.close()
 
@@ -49,11 +50,11 @@ def test_client_custom_config_and_header_merging() -> None:
 
 def test_client_rejects_non_positive_timeout() -> None:
     with pytest.raises(ValidationError):
-        EngramClient(timeout=0)
+        EngramClient(api_key="test-key", timeout=0)
 
 
 def test_client_has_sub_resources() -> None:
-    client = EngramClient()
+    client = EngramClient(api_key="test-key")
     try:
         assert hasattr(client, "memories")
         assert hasattr(client, "runs")
@@ -68,14 +69,32 @@ def _make_client(
     status_code: int = 200,
     body: dict[str, Any] | None = None,
 ) -> EngramClient:
-    transport = httpx.MockTransport(
+    mock = httpx.MockTransport(
         lambda _: httpx.Response(status_code, json=body if body is not None else {})
     )
-    return EngramClient(
-        base_url="https://test.example.com",
-        api_key="test-key",
-        http_client=httpx.Client(transport=transport),
-    )
+    client = EngramClient(base_url="https://test.example.com", api_key="test-key")
+    transport = HttpTransport(client._config, httpx.Client(transport=mock))
+    client._transport.close()
+    client._transport = transport
+    client.memories._transport = transport
+    client.runs._transport = transport
+    return client
+
+
+def _make_client_with_handler(
+    handler: Any,
+    *,
+    base_url: str = "https://test.example.com",
+    api_key: str = "k",
+) -> EngramClient:
+    http_client = httpx.Client(transport=httpx.MockTransport(handler))
+    client = EngramClient(base_url=base_url, api_key=api_key)
+    transport = HttpTransport(client._config, http_client)
+    client._transport.close()
+    client._transport = transport
+    client.memories._transport = transport
+    client.runs._transport = transport
+    return client
 
 
 # ── memories.add ────────────────────────────────────────────────────────
@@ -114,12 +133,7 @@ def test_add_sends_content_envelope() -> None:
         captured.append(request)
         return httpx.Response(200, json={"run_id": "r1", "status": "pending"})
 
-    http_client = httpx.Client(transport=httpx.MockTransport(handler))
-    client = EngramClient(
-        base_url="https://test.example.com",
-        api_key="k",
-        http_client=http_client,
-    )
+    client = _make_client_with_handler(handler)
     client.memories.add("hello", user_id="u1", group="g1")
     body = json.loads(captured[0].content)
     assert body == {
@@ -136,12 +150,7 @@ def test_add_conversation_sends_correct_envelope() -> None:
         captured.append(request)
         return httpx.Response(200, json={"run_id": "r1", "status": "pending"})
 
-    http_client = httpx.Client(transport=httpx.MockTransport(handler))
-    client = EngramClient(
-        base_url="https://test.example.com",
-        api_key="k",
-        http_client=http_client,
-    )
+    client = _make_client_with_handler(handler)
     messages = [{"role": "user", "content": "hi"}]
     client.memories.add(messages, conversation_id="c1")
     body = json.loads(captured[0].content)
@@ -181,12 +190,7 @@ def test_get_memory_sends_query_params() -> None:
         captured.append(request)
         return httpx.Response(200, json=SAMPLE_MEMORY_RESPONSE)
 
-    http_client = httpx.Client(transport=httpx.MockTransport(handler))
-    client = EngramClient(
-        base_url="https://test.example.com",
-        api_key="k",
-        http_client=http_client,
-    )
+    client = _make_client_with_handler(handler)
     client.memories.get("m1", topic="t1", user_id="u1", group="g1")
     url = captured[0].url
     assert url.params["topic"] == "t1"
@@ -198,13 +202,7 @@ def test_get_memory_sends_query_params() -> None:
 
 
 def test_delete_memory() -> None:
-    transport = httpx.MockTransport(lambda _: httpx.Response(204, content=b""))
-    http_client = httpx.Client(transport=transport)
-    client = EngramClient(
-        base_url="https://test.example.com",
-        api_key="k",
-        http_client=http_client,
-    )
+    client = _make_client_with_handler(lambda _: httpx.Response(204, content=b""))
     client.memories.delete("m1", topic="t1")
 
 
@@ -244,12 +242,7 @@ def test_search_sends_correct_body() -> None:
         captured.append(request)
         return httpx.Response(200, json={"memories": [], "total": 0})
 
-    http_client = httpx.Client(transport=httpx.MockTransport(handler))
-    client = EngramClient(
-        base_url="https://test.example.com",
-        api_key="k",
-        http_client=http_client,
-    )
+    client = _make_client_with_handler(handler)
     client.memories.search(
         query="find this",
         topics=["a"],
@@ -269,12 +262,7 @@ def test_search_default_retrieval_config() -> None:
         captured.append(request)
         return httpx.Response(200, json={"memories": [], "total": 0})
 
-    http_client = httpx.Client(transport=httpx.MockTransport(handler))
-    client = EngramClient(
-        base_url="https://test.example.com",
-        api_key="k",
-        http_client=http_client,
-    )
+    client = _make_client_with_handler(handler)
     client.memories.search(query="test")
     body = json.loads(captured[0].content)
     assert body["retrieval_config"] == {
@@ -319,9 +307,9 @@ def test_401_raises_authentication_error() -> None:
     assert "Invalid token" in str(exc_info.value)
 
 
-def test_404_raises_not_found_error() -> None:
+def test_404_raises_api_error() -> None:
     client = _make_client(status_code=404, body={"detail": "Not found"})
-    with pytest.raises(NotFoundError) as exc_info:
+    with pytest.raises(APIError) as exc_info:
         client.memories.get("missing", topic="t1")
     assert exc_info.value.status_code == 404
 

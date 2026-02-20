@@ -16,7 +16,6 @@ from .errors import (
     ConnectionError,
     EngramError,
     EngramTimeoutError,
-    NotFoundError,
     ValidationError,
 )
 from .version import __version__
@@ -32,7 +31,6 @@ __all__ = [
     "EngramError",
     "EngramTimeoutError",
     "Memory",
-    "NotFoundError",
     "PreExtractedContent",
     "RetrievalConfig",
     "Run",

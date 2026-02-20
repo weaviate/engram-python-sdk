@@ -29,13 +29,6 @@ class AuthenticationError(APIError):
         super().__init__(message, status_code=401, body=body)
 
 
-class NotFoundError(APIError):
-    """Raised when a resource is not found (404)."""
-
-    def __init__(self, message: str, *, body: object = None) -> None:
-        super().__init__(message, status_code=404, body=body)
-
-
 class ValidationError(EngramError):
     """Raised when configuration or request input is invalid."""
 

@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-import httpx
-
 from ._base_client import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, _BaseClient
 from ._http import AsyncHttpTransport
 from ._resources import AsyncMemories, AsyncRuns
@@ -22,10 +20,9 @@ class AsyncEngramClient(_BaseClient):
         self,
         *,
         base_url: str = DEFAULT_BASE_URL,
-        api_key: str | None = None,
+        api_key: str,
         headers: Mapping[str, str] | None = None,
         timeout: float = DEFAULT_TIMEOUT,
-        http_client: httpx.AsyncClient | None = None,
     ) -> None:
         super().__init__(
             base_url=base_url,
@@ -33,7 +30,7 @@ class AsyncEngramClient(_BaseClient):
             headers=headers,
             timeout=timeout,
         )
-        self._transport = AsyncHttpTransport(self._config, http_client)
+        self._transport = AsyncHttpTransport(self._config)
         self.memories = AsyncMemories(self._transport)
         self.runs = AsyncRuns(self._transport)
 

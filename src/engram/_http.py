@@ -5,7 +5,7 @@ from typing import Any
 
 import httpx
 
-from .errors import APIError, AuthenticationError, NotFoundError
+from .errors import APIError, AuthenticationError
 from .errors import ConnectionError as EngramConnectionError
 from .types import ClientConfig
 
@@ -116,10 +116,6 @@ def _process_response(response: httpx.Response) -> dict[str, Any]:
     if response.status_code == 401:
         detail = _extract_detail(data, "Authentication failed")
         raise AuthenticationError(detail, body=data)
-
-    if response.status_code == 404:
-        detail = _extract_detail(data, "Not found")
-        raise NotFoundError(detail, body=data)
 
     if response.status_code >= 400:
         detail = _extract_detail(data, response.reason_phrase)

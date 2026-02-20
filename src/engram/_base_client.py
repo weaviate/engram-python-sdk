@@ -17,7 +17,7 @@ class _BaseClient:
         self,
         *,
         base_url: str = DEFAULT_BASE_URL,
-        api_key: str | None = None,
+        api_key: str,
         headers: Mapping[str, str] | None = None,
         timeout: float = DEFAULT_TIMEOUT,
     ) -> None:
@@ -45,15 +45,14 @@ class _BaseClient:
 
 def _build_headers(
     *,
-    api_key: str | None,
+    api_key: str,
     header_overrides: Mapping[str, str],
 ) -> dict[str, str]:
     headers: dict[str, str] = {
         "Accept": "application/json",
         "Content-Type": "application/json",
         "User-Agent": f"weaviate-engram/{__version__}",
+        "Authorization": f"Bearer {api_key}",
     }
-    if api_key:
-        headers["Authorization"] = f"Bearer {api_key}"
     headers.update(header_overrides)
     return headers
