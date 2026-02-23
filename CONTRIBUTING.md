@@ -38,5 +38,3 @@ uv run pre-commit run --all-files
    - validates tag/version match,
    - builds with `uv build --no-sources`,
    - publishes with PyPI Trusted Publishing (OIDC).
-
-No `PYPI_API_TOKEN` secret is required. Trusted Publisher must be configured in the PyPI project settings.
