@@ -2,13 +2,21 @@ from __future__ import annotations
 
 from typing import Any
 
-from .._models import AddContent, PreExtractedContent, RetrievalConfig
+from .._models import (
+    AddContent,
+    ConversationContent,
+    PreExtractedContent,
+    RetrievalConfig,
+    StringContent,
+)
 
 
 def _serialize_content(content: AddContent) -> dict[str, Any]:
     """Build the content envelope with the type discriminator."""
     if isinstance(content, str):
         return {"type": "string", "content": content}
+    if isinstance(content, StringContent):
+        return {"type": "string", "content": content.content}
     if isinstance(content, PreExtractedContent):
         return {
             "type": "pre_extracted",
@@ -20,7 +28,31 @@ def _serialize_content(content: AddContent) -> dict[str, Any]:
             "type": "conversation",
             "conversation": {"messages": content},
         }
+    if isinstance(content, ConversationContent):
+        return _serialize_conversation_content(content)
     raise TypeError(f"Unsupported content type: {type(content)}")  # pragma: no cover
+
+
+def _serialize_conversation_content(content: ConversationContent) -> dict[str, Any]:
+    messages = []
+    for msg in content.messages:
+        m: dict[str, Any] = {"role": msg.role, "content": msg.content}
+        if msg.created_at is not None:
+            m["created_at"] = msg.created_at
+        if msg.tool_call_metadata is not None:
+            m["tool_call_metadata"] = {
+                "name": msg.tool_call_metadata.name,
+                "id": msg.tool_call_metadata.id,
+            }
+        messages.append(m)
+    conversation: dict[str, Any] = {"messages": messages}
+    if content.metadata is not None:
+        conversation["metadata"] = content.metadata
+    if content.created_at is not None:
+        conversation["created_at"] = content.created_at
+    if content.updated_at is not None:
+        conversation["updated_at"] = content.updated_at
+    return {"type": "conversation", "conversation": conversation}
 
 
 def build_add_body(
