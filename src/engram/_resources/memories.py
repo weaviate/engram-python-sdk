@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from .._http import AsyncHttpTransport, HttpTransport
 from .._models import AddContent, Memory, RetrievalConfig, Run, SearchResults
 from .._serialization import (
@@ -15,7 +17,7 @@ _MEMORIES_PATH = "/v1/memories"
 _MEMORIES_SEARCH_PATH = "/v1/memories/search"
 
 
-def _memory_path(memory_id: str) -> str:
+def _memory_path(memory_id: str | UUID) -> str:
     return f"{_MEMORIES_PATH}/{memory_id}"
 
 
@@ -44,7 +46,7 @@ class Memories:
 
     def get(
         self,
-        memory_id: str,
+        memory_id: str | UUID,
         *,
         user_id: str | None = None,
         group: str | None = None,
@@ -58,7 +60,7 @@ class Memories:
 
     def delete(
         self,
-        memory_id: str,
+        memory_id: str | UUID,
         *,
         user_id: str | None = None,
         group: str | None = None,
@@ -116,7 +118,7 @@ class AsyncMemories:
 
     async def get(
         self,
-        memory_id: str,
+        memory_id: str | UUID,
         *,
         user_id: str | None = None,
         group: str | None = None,
@@ -130,7 +132,7 @@ class AsyncMemories:
 
     async def delete(
         self,
-        memory_id: str,
+        memory_id: str | UUID,
         *,
         user_id: str | None = None,
         group: str | None = None,
