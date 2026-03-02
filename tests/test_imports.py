@@ -7,15 +7,19 @@ def test_public_imports() -> None:
         CommittedOperation,
         CommittedOperations,
         ConnectionError,
+        ConversationContent,
         EngramClient,
         EngramError,
         EngramTimeoutError,
         Memory,
+        MessageContent,
         PreExtractedContent,
         RetrievalConfig,
         Run,
         RunStatus,
         SearchResults,
+        StringContent,
+        ToolCallMetadata,
         ValidationError,
     )
 
@@ -34,6 +38,10 @@ def test_public_imports() -> None:
     assert isinstance(RetrievalConfig, type)
     assert isinstance(CommittedOperation, type)
     assert isinstance(CommittedOperations, type)
+    assert isinstance(ConversationContent, type)
+    assert isinstance(MessageContent, type)
+    assert isinstance(StringContent, type)
+    assert isinstance(ToolCallMetadata, type)
 
     expected_exports = {
         "APIError",
@@ -42,15 +50,19 @@ def test_public_imports() -> None:
         "CommittedOperation",
         "CommittedOperations",
         "ConnectionError",
+        "ConversationContent",
         "EngramClient",
         "EngramError",
         "EngramTimeoutError",
         "Memory",
+        "MessageContent",
         "PreExtractedContent",
         "RetrievalConfig",
         "Run",
         "RunStatus",
         "SearchResults",
+        "StringContent",
+        "ToolCallMetadata",
         "ValidationError",
         "__version__",
     }
