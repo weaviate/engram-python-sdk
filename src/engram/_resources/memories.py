@@ -46,15 +46,11 @@ class Memories:
         self,
         memory_id: str,
         *,
-        topic: str,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
     ) -> Memory:
         params = build_memory_params(
-            topic=topic,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
         )
         data = self._transport.request("GET", _memory_path(memory_id), params=params)
@@ -64,15 +60,11 @@ class Memories:
         self,
         memory_id: str,
         *,
-        topic: str,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
     ) -> None:
         params = build_memory_params(
-            topic=topic,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
         )
         self._transport.request("DELETE", _memory_path(memory_id), params=params)
@@ -126,15 +118,11 @@ class AsyncMemories:
         self,
         memory_id: str,
         *,
-        topic: str,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
     ) -> Memory:
         params = build_memory_params(
-            topic=topic,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
         )
         data = await self._transport.request("GET", _memory_path(memory_id), params=params)
@@ -144,15 +132,11 @@ class AsyncMemories:
         self,
         memory_id: str,
         *,
-        topic: str,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
     ) -> None:
         params = build_memory_params(
-            topic=topic,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
         )
         await self._transport.request("DELETE", _memory_path(memory_id), params=params)

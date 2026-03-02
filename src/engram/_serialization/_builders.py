@@ -41,16 +41,12 @@ def build_add_body(
 
 def build_memory_params(
     *,
-    topic: str,
     user_id: str | None,
-    conversation_id: str | None,
     group: str | None,
 ) -> dict[str, str]:
-    params: dict[str, str] = {"topic": topic}
+    params: dict[str, str] = {}
     if user_id is not None:
         params["user_id"] = user_id
-    if conversation_id is not None:
-        params["conversation_id"] = conversation_id
     if group is not None:
         params["group"] = group
     return params
