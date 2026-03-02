@@ -39,13 +39,13 @@ def test_build_add_body_str_with_options() -> None:
 
 def test_build_add_body_pre_extracted() -> None:
     body = build_add_body(
-        PreExtractedContent(content="fact"),
+        PreExtractedContent(content="fact", topic="topic"),
         user_id=None,
         conversation_id=None,
         group=None,
     )
     assert body == {
-        "content": {"type": "pre_extracted", "content": "fact"},
+        "content": {"type": "pre_extracted", "content": "fact", "topic": "topic"},
     }
 
 

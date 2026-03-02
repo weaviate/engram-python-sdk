@@ -10,6 +10,7 @@ class PreExtractedContent:
     """Pre-extracted content that bypasses the extraction pipeline."""
 
     content: str
+    topic: str
 
 
 # Type alias for the content argument to memories.add()

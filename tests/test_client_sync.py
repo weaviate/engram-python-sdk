@@ -110,7 +110,7 @@ def test_add_str() -> None:
 def test_add_pre_extracted() -> None:
     client = _make_client(body={"run_id": "r2", "status": "pending"})
     result = client.memories.add(
-        PreExtractedContent(content="fact"),
+        PreExtractedContent(content="fact", topic="topic"),
         user_id="u1",
     )
     assert result.run_id == "r2"
