@@ -39,18 +39,6 @@ def test_build_add_body_str_with_options() -> None:
 
 def test_build_add_body_pre_extracted() -> None:
     body = build_add_body(
-        PreExtractedContent(content="fact", tags=["a", "b"]),
-        user_id=None,
-        conversation_id=None,
-        group=None,
-    )
-    assert body == {
-        "content": {"type": "pre_extracted", "content": "fact", "tags": ["a", "b"]},
-    }
-
-
-def test_build_add_body_pre_extracted_no_tags() -> None:
-    body = build_add_body(
         PreExtractedContent(content="fact"),
         user_id=None,
         conversation_id=None,

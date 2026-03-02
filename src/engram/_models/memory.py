@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Literal, TypeAlias
 
 
@@ -10,7 +10,6 @@ class PreExtractedContent:
     """Pre-extracted content that bypasses the extraction pipeline."""
 
     content: str
-    tags: list[str] = field(default_factory=list)
 
 
 # Type alias for the content argument to memories.add()

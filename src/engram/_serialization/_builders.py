@@ -11,8 +11,6 @@ def _serialize_content(content: AddContent) -> dict[str, Any]:
         return {"type": "string", "content": content}
     if isinstance(content, PreExtractedContent):
         d: dict[str, Any] = {"type": "pre_extracted", "content": content.content}
-        if content.tags:
-            d["tags"] = content.tags
         return d
     if isinstance(content, list):
         return {
