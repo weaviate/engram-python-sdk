@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from uuid import UUID
+
 from .._http import AsyncHttpTransport, HttpTransport
 from .._models import AddContent, Memory, RetrievalConfig, Run, SearchResults
 from .._serialization import (
@@ -15,7 +17,7 @@ _MEMORIES_PATH = "/v1/memories"
 _MEMORIES_SEARCH_PATH = "/v1/memories/search"
 
 
-def _memory_path(memory_id: str) -> str:
+def _memory_path(memory_id: str | UUID) -> str:
     return f"{_MEMORIES_PATH}/{memory_id}"
 
 
@@ -44,17 +46,13 @@ class Memories:
 
     def get(
         self,
-        memory_id: str,
+        memory_id: str | UUID,
         *,
-        topic: str,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
     ) -> Memory:
         params = build_memory_params(
-            topic=topic,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
         )
         data = self._transport.request("GET", _memory_path(memory_id), params=params)
@@ -62,17 +60,13 @@ class Memories:
 
     def delete(
         self,
-        memory_id: str,
+        memory_id: str | UUID,
         *,
-        topic: str,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
     ) -> None:
         params = build_memory_params(
-            topic=topic,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
         )
         self._transport.request("DELETE", _memory_path(memory_id), params=params)
@@ -124,17 +118,13 @@ class AsyncMemories:
 
     async def get(
         self,
-        memory_id: str,
+        memory_id: str | UUID,
         *,
-        topic: str,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
     ) -> Memory:
         params = build_memory_params(
-            topic=topic,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
         )
         data = await self._transport.request("GET", _memory_path(memory_id), params=params)
@@ -142,17 +132,13 @@ class AsyncMemories:
 
     async def delete(
         self,
-        memory_id: str,
+        memory_id: str | UUID,
         *,
-        topic: str,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
     ) -> None:
         params = build_memory_params(
-            topic=topic,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
         )
         await self._transport.request("DELETE", _memory_path(memory_id), params=params)
