@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
-from dataclasses import dataclass, field
-from typing import Literal, TypeAlias
+from dataclasses import dataclass
+from typing import Any, Literal, TypeAlias
 
 
 @dataclass(slots=True)
@@ -10,11 +10,48 @@ class PreExtractedContent:
     """Pre-extracted content that bypasses the extraction pipeline."""
 
     content: str
-    tags: list[str] = field(default_factory=list)
+    topic: str
+
+
+@dataclass(slots=True)
+class StringContent:
+    """String content that bypasses the extraction pipeline."""
+
+    content: str
+
+
+@dataclass(slots=True)
+class ToolCallMetadata:
+    """Tool call metadata."""
+
+    name: str
+    id: str
+
+
+@dataclass(slots=True)
+class MessageContent:
+    """A message in a conversation."""
+
+    role: Literal["user", "assistant", "system"]
+    content: str
+    created_at: str | None = None
+    tool_call_metadata: ToolCallMetadata | None = None
+
+
+@dataclass(slots=True)
+class ConversationContent:
+    """Conversation content that bypasses the extraction pipeline."""
+
+    messages: list[MessageContent]
+    metadata: dict[str, Any] | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
 
 
 # Type alias for the content argument to memories.add()
-AddContent: TypeAlias = str | list[dict[str, str]] | PreExtractedContent
+AddContent: TypeAlias = (
+    str | list[dict[str, str]] | PreExtractedContent | ConversationContent | StringContent
+)
 
 
 @dataclass(slots=True)

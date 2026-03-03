@@ -1,4 +1,11 @@
-from engram._models import PreExtractedContent, RetrievalConfig
+from engram._models import (
+    ConversationContent,
+    MessageContent,
+    PreExtractedContent,
+    RetrievalConfig,
+    StringContent,
+    ToolCallMetadata,
+)
 from engram._serialization import (
     build_add_body,
     build_memory_params,
@@ -39,25 +46,13 @@ def test_build_add_body_str_with_options() -> None:
 
 def test_build_add_body_pre_extracted() -> None:
     body = build_add_body(
-        PreExtractedContent(content="fact", tags=["a", "b"]),
+        PreExtractedContent(content="fact", topic="topic"),
         user_id=None,
         conversation_id=None,
         group=None,
     )
     assert body == {
-        "content": {"type": "pre_extracted", "content": "fact", "tags": ["a", "b"]},
-    }
-
-
-def test_build_add_body_pre_extracted_no_tags() -> None:
-    body = build_add_body(
-        PreExtractedContent(content="fact"),
-        user_id=None,
-        conversation_id=None,
-        group=None,
-    )
-    assert body == {
-        "content": {"type": "pre_extracted", "content": "fact"},
+        "content": {"type": "pre_extracted", "content": "fact", "topic": "topic"},
     }
 
 
@@ -80,6 +75,107 @@ def test_build_add_body_conversation() -> None:
         "user_id": "u1",
         "conversation_id": "c1",
     }
+
+
+def test_build_add_body_string_content() -> None:
+    body = build_add_body(
+        StringContent(content="hello world"),
+        user_id=None,
+        conversation_id=None,
+        group=None,
+    )
+    assert body == {"content": {"type": "string", "content": "hello world"}}
+
+
+def test_build_add_body_string_content_with_options() -> None:
+    body = build_add_body(
+        StringContent(content="hello"),
+        user_id="u1",
+        conversation_id="c1",
+        group="g1",
+    )
+    assert body == {
+        "content": {"type": "string", "content": "hello"},
+        "user_id": "u1",
+        "conversation_id": "c1",
+        "group": "g1",
+    }
+
+
+def test_build_add_body_conversation_content() -> None:
+    messages = [
+        MessageContent(role="user", content="hi"),
+        MessageContent(role="assistant", content="hello"),
+    ]
+    body = build_add_body(
+        ConversationContent(messages=messages),
+        user_id="u1",
+        conversation_id="c1",
+        group=None,
+    )
+    assert body == {
+        "content": {
+            "type": "conversation",
+            "conversation": {
+                "messages": [
+                    {"role": "user", "content": "hi"},
+                    {"role": "assistant", "content": "hello"},
+                ],
+            },
+        },
+        "user_id": "u1",
+        "conversation_id": "c1",
+    }
+
+
+def test_build_add_body_conversation_content_with_metadata() -> None:
+    messages = [MessageContent(role="user", content="hi")]
+    body = build_add_body(
+        ConversationContent(
+            messages=messages,
+            metadata={"session_id": "s1"},
+            created_at="2024-01-01T00:00:00Z",
+            updated_at="2024-01-02T00:00:00Z",
+        ),
+        user_id=None,
+        conversation_id=None,
+        group=None,
+    )
+    conv = body["content"]["conversation"]
+    assert conv["metadata"] == {"session_id": "s1"}
+    assert conv["created_at"] == "2024-01-01T00:00:00Z"
+    assert conv["updated_at"] == "2024-01-02T00:00:00Z"
+
+
+def test_build_add_body_conversation_content_with_message_timestamps() -> None:
+    messages = [MessageContent(role="user", content="hi", created_at="2024-01-01T00:00:00Z")]
+    body = build_add_body(
+        ConversationContent(messages=messages),
+        user_id=None,
+        conversation_id=None,
+        group=None,
+    )
+    msg = body["content"]["conversation"]["messages"][0]
+    assert msg["created_at"] == "2024-01-01T00:00:00Z"
+    assert "tool_call_metadata" not in msg
+
+
+def test_build_add_body_conversation_content_with_tool_call_metadata() -> None:
+    messages = [
+        MessageContent(
+            role="assistant",
+            content="using tool",
+            tool_call_metadata=ToolCallMetadata(name="search", id="tc1"),
+        )
+    ]
+    body = build_add_body(
+        ConversationContent(messages=messages),
+        user_id=None,
+        conversation_id=None,
+        group=None,
+    )
+    msg = body["content"]["conversation"]["messages"][0]
+    assert msg["tool_call_metadata"] == {"name": "search", "id": "tc1"}
 
 
 # ── build_memory_params ─────────────────────────────────────────────────

@@ -5,7 +5,14 @@ import httpx
 import pytest
 
 from engram._http import HttpTransport
-from engram._models import PreExtractedContent, RetrievalConfig
+from engram._models import (
+    ConversationContent,
+    MessageContent,
+    PreExtractedContent,
+    RetrievalConfig,
+    StringContent,
+    ToolCallMetadata,
+)
 from engram.client import DEFAULT_BASE_URL, EngramClient
 from engram.errors import APIError, AuthenticationError, ValidationError
 
@@ -110,7 +117,7 @@ def test_add_str() -> None:
 def test_add_pre_extracted() -> None:
     client = _make_client(body={"run_id": "r2", "status": "pending"})
     result = client.memories.add(
-        PreExtractedContent(content="fact", tags=["a"]),
+        PreExtractedContent(content="fact", topic="topic"),
         user_id="u1",
     )
     assert result.run_id == "r2"
@@ -161,6 +168,69 @@ def test_add_conversation_sends_correct_envelope() -> None:
         },
         "conversation_id": "c1",
     }
+
+
+def test_add_string_content() -> None:
+    client = _make_client(body={"run_id": "r4", "status": "pending"})
+    result = client.memories.add(StringContent(content="hello"), user_id="u1")
+    assert result.run_id == "r4"
+
+
+def test_add_string_content_sends_correct_envelope() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json={"run_id": "r1", "status": "pending"})
+
+    client = _make_client_with_handler(handler)
+    client.memories.add(StringContent(content="hello"), user_id="u1", group="g1")
+    body = json.loads(captured[0].content)
+    assert body == {
+        "content": {"type": "string", "content": "hello"},
+        "user_id": "u1",
+        "group": "g1",
+    }
+
+
+def test_add_conversation_content() -> None:
+    client = _make_client(body={"run_id": "r5", "status": "pending"})
+    result = client.memories.add(
+        ConversationContent(messages=[MessageContent(role="user", content="hi")]),
+        user_id="u1",
+        conversation_id="c1",
+    )
+    assert result.run_id == "r5"
+
+
+def test_add_conversation_content_sends_correct_envelope() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json={"run_id": "r1", "status": "pending"})
+
+    client = _make_client_with_handler(handler)
+    client.memories.add(
+        ConversationContent(
+            messages=[
+                MessageContent(role="user", content="hi"),
+                MessageContent(
+                    role="assistant",
+                    content="using tool",
+                    tool_call_metadata=ToolCallMetadata(name="search", id="tc1"),
+                ),
+            ],
+            metadata={"session_id": "s1"},
+        ),
+        conversation_id="c1",
+    )
+    body = json.loads(captured[0].content)
+    assert body["content"]["type"] == "conversation"
+    conv = body["content"]["conversation"]
+    assert conv["metadata"] == {"session_id": "s1"}
+    assert conv["messages"][1]["tool_call_metadata"] == {"name": "search", "id": "tc1"}
+    assert body["conversation_id"] == "c1"
 
 
 # ── memories.get ────────────────────────────────────────────────────────

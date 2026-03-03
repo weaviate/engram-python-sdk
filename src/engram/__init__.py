@@ -1,12 +1,16 @@
 from ._models import (
     CommittedOperation,
     CommittedOperations,
+    ConversationContent,
     Memory,
+    MessageContent,
     PreExtractedContent,
     RetrievalConfig,
     Run,
     RunStatus,
     SearchResults,
+    StringContent,
+    ToolCallMetadata,
 )
 from .async_client import AsyncEngramClient
 from .client import EngramClient
@@ -27,15 +31,19 @@ __all__ = [
     "CommittedOperation",
     "CommittedOperations",
     "ConnectionError",
+    "ConversationContent",
     "EngramClient",
     "EngramError",
     "EngramTimeoutError",
     "Memory",
+    "MessageContent",
     "PreExtractedContent",
     "RetrievalConfig",
     "Run",
     "RunStatus",
     "SearchResults",
+    "StringContent",
+    "ToolCallMetadata",
     "ValidationError",
     "__version__",
 ]
