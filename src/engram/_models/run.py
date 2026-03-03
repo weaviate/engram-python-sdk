@@ -36,6 +36,7 @@ class RunStatus:
     updated_at: str
     committed_operations: CommittedOperations | None = None
     error: str | None = None
+    user_id: str | None = None
 
     @property
     def memories_created(self) -> list[CommittedOperation]:

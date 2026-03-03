@@ -248,7 +248,7 @@ SAMPLE_MEMORY_RESPONSE: dict[str, Any] = {
 
 def test_get_memory() -> None:
     client = _make_client(body=SAMPLE_MEMORY_RESPONSE)
-    mem = client.memories.get("m1", topic="t1")
+    mem = client.memories.get("m1")
     assert mem.id == "m1"
     assert mem.content == "some content"
 
@@ -261,9 +261,9 @@ def test_get_memory_sends_query_params() -> None:
         return httpx.Response(200, json=SAMPLE_MEMORY_RESPONSE)
 
     client = _make_client_with_handler(handler)
-    client.memories.get("m1", topic="t1", user_id="u1", group="g1")
+    client.memories.get("m1", user_id="u1", group="g1")
     url = captured[0].url
-    assert url.params["topic"] == "t1"
+    assert "topic" not in url.params
     assert url.params["user_id"] == "u1"
     assert url.params["group"] == "g1"
 
@@ -273,7 +273,7 @@ def test_get_memory_sends_query_params() -> None:
 
 def test_delete_memory() -> None:
     client = _make_client_with_handler(lambda _: httpx.Response(204, content=b""))
-    client.memories.delete("m1", topic="t1")
+    client.memories.delete("m1")
 
 
 # ── memories.search ─────────────────────────────────────────────────────
@@ -380,7 +380,7 @@ def test_401_raises_authentication_error() -> None:
 def test_404_raises_api_error() -> None:
     client = _make_client(status_code=404, body={"detail": "Not found"})
     with pytest.raises(APIError) as exc_info:
-        client.memories.get("missing", topic="t1")
+        client.memories.get("missing")
     assert exc_info.value.status_code == 404
 
 

@@ -182,16 +182,14 @@ def test_build_add_body_conversation_content_with_tool_call_metadata() -> None:
 
 
 def test_build_memory_params_minimal() -> None:
-    params = build_memory_params(topic="t1", user_id=None, conversation_id=None, group=None)
-    assert params == {"topic": "t1"}
+    params = build_memory_params(user_id=None, group=None)
+    assert params == {}
 
 
 def test_build_memory_params_full() -> None:
-    params = build_memory_params(topic="t1", user_id="u1", conversation_id="c1", group="g1")
+    params = build_memory_params(user_id="u1", group="g1")
     assert params == {
-        "topic": "t1",
         "user_id": "u1",
-        "conversation_id": "c1",
         "group": "g1",
     }
 
@@ -327,7 +325,13 @@ def test_parse_run_status_minimal() -> None:
     assert result.starting_step == 0
     assert result.committed_operations is None
     assert result.error is None
+    assert result.user_id is None
     assert result.memories_created == []
+
+
+def test_parse_run_status_with_user_id() -> None:
+    result = parse_run_status({**SAMPLE_RUN_STATUS, "user_id": "alice"})
+    assert result.user_id == "alice"
 
 
 def test_parse_run_status_with_committed_operations() -> None:

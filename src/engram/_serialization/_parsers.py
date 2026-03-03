@@ -72,4 +72,5 @@ def parse_run_status(data: dict[str, Any]) -> RunStatus:
         if committed_ops is not None
         else None,
         error=data.get("error"),
+        user_id=data.get("user_id"),
     )
