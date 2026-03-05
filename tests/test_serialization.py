@@ -204,12 +204,9 @@ def test_build_search_body_defaults() -> None:
         user_id=None,
         conversation_id=None,
         group=None,
-        retrieval_config=RetrievalConfig(),
+        retrieval_config=None,
     )
-    assert body == {
-        "query": "test",
-        "retrieval_config": {"retrieval_type": "hybrid", "limit": 10},
-    }
+    assert body == {"query": "test"}
 
 
 def test_build_search_body_full() -> None:
@@ -282,7 +279,7 @@ def test_parse_memory_with_optional_fields() -> None:
 
 
 def test_parse_search_results() -> None:
-    data = {"memories": [{"Body": SAMPLE_MEMORY}], "total": 1}
+    data = {"memories": [SAMPLE_MEMORY], "total": 1}
     result = parse_search_results(data)
     assert result.total == 1
     assert len(result) == 1
@@ -297,7 +294,7 @@ def test_parse_search_results_empty() -> None:
 
 def test_search_results_iterable() -> None:
     data = {
-        "memories": [{"Body": SAMPLE_MEMORY}, {"Body": {**SAMPLE_MEMORY, "id": "m2"}}],
+        "memories": [SAMPLE_MEMORY, {**SAMPLE_MEMORY, "id": "m2"}],
         "total": 2,
     }
     result = parse_search_results(data)
