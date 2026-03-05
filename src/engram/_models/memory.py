@@ -56,8 +56,8 @@ AddContent: TypeAlias = (
 
 @dataclass(slots=True)
 class RetrievalConfig:
-    retrieval_type: Literal["vector", "bm25", "hybrid"] = "hybrid"
-    limit: int = 10
+    retrieval_type: Literal["vector", "bm25", "hybrid"]
+    limit: int | None = None
 
 
 @dataclass(slots=True)

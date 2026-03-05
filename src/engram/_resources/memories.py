@@ -87,7 +87,7 @@ class Memories:
             user_id=user_id,
             conversation_id=conversation_id,
             group=group,
-            retrieval_config=retrieval_config or RetrievalConfig(),
+            retrieval_config=retrieval_config,
         )
         data = self._transport.request("POST", _MEMORIES_SEARCH_PATH, json=body)
         return parse_search_results(data)
@@ -159,7 +159,7 @@ class AsyncMemories:
             user_id=user_id,
             conversation_id=conversation_id,
             group=group,
-            retrieval_config=retrieval_config or RetrievalConfig(),
+            retrieval_config=retrieval_config,
         )
         data = await self._transport.request("POST", _MEMORIES_SEARCH_PATH, json=body)
         return parse_search_results(data)

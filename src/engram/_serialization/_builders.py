@@ -92,15 +92,14 @@ def build_search_body(
     user_id: str | None,
     conversation_id: str | None,
     group: str | None,
-    retrieval_config: RetrievalConfig,
+    retrieval_config: RetrievalConfig | None,
 ) -> dict[str, Any]:
-    body: dict[str, Any] = {
-        "query": query,
-        "retrieval_config": {
+    body: dict[str, Any] = {"query": query}
+    if retrieval_config is not None:
+        body["retrieval_config"] = {
             "retrieval_type": retrieval_config.retrieval_type,
             "limit": retrieval_config.limit,
-        },
-    }
+        }
     if topics is not None:
         body["topics"] = topics
     if user_id is not None:

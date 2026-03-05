@@ -204,12 +204,9 @@ def test_build_search_body_defaults() -> None:
         user_id=None,
         conversation_id=None,
         group=None,
-        retrieval_config=RetrievalConfig(),
+        retrieval_config=None,
     )
-    assert body == {
-        "query": "test",
-        "retrieval_config": {"retrieval_type": "hybrid", "limit": 10},
-    }
+    assert body == {"query": "test"}
 
 
 def test_build_search_body_full() -> None:

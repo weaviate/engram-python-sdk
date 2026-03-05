@@ -325,7 +325,7 @@ def test_search_sends_correct_body() -> None:
     assert body["retrieval_config"]["limit"] == 5
 
 
-def test_search_default_retrieval_config() -> None:
+def test_search_no_retrieval_config_by_default() -> None:
     captured: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -335,10 +335,7 @@ def test_search_default_retrieval_config() -> None:
     client = _make_client_with_handler(handler)
     client.memories.search(query="test")
     body = json.loads(captured[0].content)
-    assert body["retrieval_config"] == {
-        "retrieval_type": "hybrid",
-        "limit": 10,
-    }
+    assert "retrieval_config" not in body
 
 
 # ── runs.get ────────────────────────────────────────────────────────────
