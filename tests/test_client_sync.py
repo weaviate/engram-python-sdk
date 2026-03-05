@@ -281,7 +281,7 @@ def test_delete_memory() -> None:
 
 def test_search_memories() -> None:
     response_body: dict[str, Any] = {
-        "memories": [{"Body": SAMPLE_MEMORY_RESPONSE}],
+        "memories": [SAMPLE_MEMORY_RESPONSE],
         "total": 1,
     }
     client = _make_client(body=response_body)
@@ -293,8 +293,8 @@ def test_search_memories() -> None:
 def test_search_memories_iterable() -> None:
     response_body: dict[str, Any] = {
         "memories": [
-            {"Body": SAMPLE_MEMORY_RESPONSE},
-            {"Body": {**SAMPLE_MEMORY_RESPONSE, "id": "m2", "score": 0.85}},
+            SAMPLE_MEMORY_RESPONSE,
+            {**SAMPLE_MEMORY_RESPONSE, "id": "m2", "score": 0.85},
         ],
         "total": 2,
     }
