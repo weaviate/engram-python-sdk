@@ -39,11 +39,19 @@ def _serialize_conversation_content(content: ConversationContent) -> dict[str, A
         m: dict[str, Any] = {"role": msg.role, "content": msg.content}
         if msg.created_at is not None:
             m["created_at"] = msg.created_at
-        if msg.tool_call_metadata is not None:
-            m["tool_call_metadata"] = {
-                "name": msg.tool_call_metadata.name,
-                "id": msg.tool_call_metadata.id,
-            }
+        if msg.tool_call_id is not None:
+            m["tool_call_id"] = msg.tool_call_id
+        if msg.name is not None:
+            m["name"] = msg.name
+        if msg.tool_calls is not None:
+            m["tool_calls"] = [
+                {
+                    "id": tc.id,
+                    "type": tc.type,
+                    "function": {"name": tc.function.name, "arguments": tc.function.arguments},
+                }
+                for tc in msg.tool_calls
+            ]
         messages.append(m)
     conversation: dict[str, Any] = {"messages": messages}
     if content.metadata is not None:

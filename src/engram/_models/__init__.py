@@ -7,7 +7,8 @@ from .memory import (
     RetrievalConfig,
     SearchResults,
     StringContent,
-    ToolCallMetadata,
+    ToolCallFuncInput,
+    ToolCallInput,
 )
 from .run import CommittedOperation, CommittedOperations, Run, RunStatus
 
@@ -24,5 +25,6 @@ __all__ = [
     "RunStatus",
     "SearchResults",
     "StringContent",
-    "ToolCallMetadata",
+    "ToolCallFuncInput",
+    "ToolCallInput",
 ]

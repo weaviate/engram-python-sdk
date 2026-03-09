@@ -19,7 +19,8 @@ def test_public_imports() -> None:
         RunStatus,
         SearchResults,
         StringContent,
-        ToolCallMetadata,
+        ToolCallFuncInput,
+        ToolCallInput,
         ValidationError,
     )
 
@@ -41,7 +42,8 @@ def test_public_imports() -> None:
     assert isinstance(ConversationContent, type)
     assert isinstance(MessageContent, type)
     assert isinstance(StringContent, type)
-    assert isinstance(ToolCallMetadata, type)
+    assert isinstance(ToolCallFuncInput, type)
+    assert isinstance(ToolCallInput, type)
 
     expected_exports = {
         "APIError",
@@ -62,7 +64,8 @@ def test_public_imports() -> None:
         "RunStatus",
         "SearchResults",
         "StringContent",
-        "ToolCallMetadata",
+        "ToolCallFuncInput",
+        "ToolCallInput",
         "ValidationError",
         "__version__",
     }

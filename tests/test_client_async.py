@@ -11,7 +11,8 @@ from engram._models import (
     PreExtractedContent,
     RetrievalConfig,
     StringContent,
-    ToolCallMetadata,
+    ToolCallFuncInput,
+    ToolCallInput,
 )
 from engram.async_client import DEFAULT_BASE_URL, AsyncEngramClient
 from engram.errors import APIError, AuthenticationError, ValidationError
@@ -202,8 +203,11 @@ async def test_add_conversation_content_sends_correct_envelope() -> None:
                 MessageContent(role="user", content="hi"),
                 MessageContent(
                     role="assistant",
-                    content="using tool",
-                    tool_call_metadata=ToolCallMetadata(name="search", id="tc1"),
+                    tool_calls=[
+                        ToolCallInput(
+                            id="tc1", function=ToolCallFuncInput(name="search", arguments="{}")
+                        )
+                    ],
                 ),
             ],
             metadata={"session_id": "s1"},
@@ -214,7 +218,9 @@ async def test_add_conversation_content_sends_correct_envelope() -> None:
     assert body["content"]["type"] == "conversation"
     conv = body["content"]["conversation"]
     assert conv["metadata"] == {"session_id": "s1"}
-    assert conv["messages"][1]["tool_call_metadata"] == {"name": "search", "id": "tc1"}
+    assert conv["messages"][1]["tool_calls"] == [
+        {"id": "tc1", "type": "function", "function": {"name": "search", "arguments": "{}"}}
+    ]
     assert body["conversation_id"] == "c1"
 
 

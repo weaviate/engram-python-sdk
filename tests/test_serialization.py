@@ -4,7 +4,8 @@ from engram._models import (
     PreExtractedContent,
     RetrievalConfig,
     StringContent,
-    ToolCallMetadata,
+    ToolCallFuncInput,
+    ToolCallInput,
 )
 from engram._serialization import (
     build_add_body,
@@ -160,12 +161,15 @@ def test_build_add_body_conversation_content_with_message_timestamps() -> None:
     assert "tool_call_metadata" not in msg
 
 
-def test_build_add_body_conversation_content_with_tool_call_metadata() -> None:
+def test_build_add_body_conversation_content_with_tool_calls() -> None:
     messages = [
         MessageContent(
             role="assistant",
-            content="using tool",
-            tool_call_metadata=ToolCallMetadata(name="search", id="tc1"),
+            tool_calls=[
+                ToolCallInput(
+                    id="tc1", function=ToolCallFuncInput(name="search", arguments='{"q":"x"}')
+                )
+            ],
         )
     ]
     body = build_add_body(
@@ -175,7 +179,37 @@ def test_build_add_body_conversation_content_with_tool_call_metadata() -> None:
         group=None,
     )
     msg = body["content"]["conversation"]["messages"][0]
-    assert msg["tool_call_metadata"] == {"name": "search", "id": "tc1"}
+    assert msg["tool_calls"] == [
+        {"id": "tc1", "type": "function", "function": {"name": "search", "arguments": '{"q":"x"}'}}
+    ]
+
+
+def test_build_add_body_conversation_content_with_tool_role() -> None:
+    messages = [MessageContent(role="tool", content="result", tool_call_id="tc1", name="search")]
+    body = build_add_body(
+        ConversationContent(messages=messages),
+        user_id=None,
+        conversation_id=None,
+        group=None,
+    )
+    msg = body["content"]["conversation"]["messages"][0]
+    assert msg["role"] == "tool"
+    assert msg["tool_call_id"] == "tc1"
+    assert msg["name"] == "search"
+    assert msg["content"] == "result"
+
+
+def test_build_add_body_conversation_content_with_developer_role() -> None:
+    messages = [MessageContent(role="developer", content="You are a helpful assistant.")]
+    body = build_add_body(
+        ConversationContent(messages=messages),
+        user_id=None,
+        conversation_id=None,
+        group=None,
+    )
+    msg = body["content"]["conversation"]["messages"][0]
+    assert msg["role"] == "developer"
+    assert msg["content"] == "You are a helpful assistant."
 
 
 # ── build_memory_params ─────────────────────────────────────────────────
