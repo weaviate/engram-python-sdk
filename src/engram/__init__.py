@@ -10,6 +10,7 @@ from ._models import (
     RunStatus,
     SearchResults,
     StringContent,
+    ToolCallCustomInput,
     ToolCallFuncInput,
     ToolCallInput,
 )
@@ -44,6 +45,7 @@ __all__ = [
     "RunStatus",
     "SearchResults",
     "StringContent",
+    "ToolCallCustomInput",
     "ToolCallFuncInput",
     "ToolCallInput",
     "ValidationError",

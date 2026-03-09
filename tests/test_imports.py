@@ -19,6 +19,7 @@ def test_public_imports() -> None:
         RunStatus,
         SearchResults,
         StringContent,
+        ToolCallCustomInput,
         ToolCallFuncInput,
         ToolCallInput,
         ValidationError,
@@ -42,6 +43,7 @@ def test_public_imports() -> None:
     assert isinstance(ConversationContent, type)
     assert isinstance(MessageContent, type)
     assert isinstance(StringContent, type)
+    assert isinstance(ToolCallCustomInput, type)
     assert isinstance(ToolCallFuncInput, type)
     assert isinstance(ToolCallInput, type)
 
@@ -64,6 +66,7 @@ def test_public_imports() -> None:
         "RunStatus",
         "SearchResults",
         "StringContent",
+        "ToolCallCustomInput",
         "ToolCallFuncInput",
         "ToolCallInput",
         "ValidationError",

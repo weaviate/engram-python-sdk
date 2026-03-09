@@ -4,6 +4,7 @@ from engram._models import (
     PreExtractedContent,
     RetrievalConfig,
     StringContent,
+    ToolCallCustomInput,
     ToolCallFuncInput,
     ToolCallInput,
 )
@@ -181,6 +182,31 @@ def test_build_add_body_conversation_content_with_tool_calls() -> None:
     msg = body["content"]["conversation"]["messages"][0]
     assert msg["tool_calls"] == [
         {"id": "tc1", "type": "function", "function": {"name": "search", "arguments": '{"q":"x"}'}}
+    ]
+
+
+def test_build_add_body_conversation_content_with_custom_tool_calls() -> None:
+    messages = [
+        MessageContent(
+            role="assistant",
+            tool_calls=[
+                ToolCallInput(
+                    id="tc2",
+                    type="custom",
+                    custom=ToolCallCustomInput(name="my_tool", input="some input"),
+                )
+            ],
+        )
+    ]
+    body = build_add_body(
+        ConversationContent(messages=messages),
+        user_id=None,
+        conversation_id=None,
+        group=None,
+    )
+    msg = body["content"]["conversation"]["messages"][0]
+    assert msg["tool_calls"] == [
+        {"id": "tc2", "type": "custom", "custom": {"name": "my_tool", "input": "some input"}}
     ]
 
 

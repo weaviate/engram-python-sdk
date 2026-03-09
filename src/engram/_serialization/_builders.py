@@ -8,7 +8,17 @@ from .._models import (
     PreExtractedContent,
     RetrievalConfig,
     StringContent,
+    ToolCallInput,
 )
+
+
+def _serialize_tool_call(tc: ToolCallInput) -> dict[str, Any]:
+    out: dict[str, Any] = {"id": tc.id, "type": tc.type}
+    if tc.function is not None:
+        out["function"] = {"name": tc.function.name, "arguments": tc.function.arguments}
+    if tc.custom is not None:
+        out["custom"] = {"name": tc.custom.name, "input": tc.custom.input}
+    return out
 
 
 def _serialize_content(content: AddContent) -> dict[str, Any]:
@@ -44,14 +54,7 @@ def _serialize_conversation_content(content: ConversationContent) -> dict[str, A
         if msg.name is not None:
             m["name"] = msg.name
         if msg.tool_calls is not None:
-            m["tool_calls"] = [
-                {
-                    "id": tc.id,
-                    "type": tc.type,
-                    "function": {"name": tc.function.name, "arguments": tc.function.arguments},
-                }
-                for tc in msg.tool_calls
-            ]
+            m["tool_calls"] = [_serialize_tool_call(tc) for tc in msg.tool_calls]
         messages.append(m)
     conversation: dict[str, Any] = {"messages": messages}
     if content.metadata is not None:

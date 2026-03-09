@@ -22,19 +22,31 @@ class StringContent:
 
 @dataclass(slots=True)
 class ToolCallFuncInput:
-    """The function details of an OpenAI-format tool call."""
+    """The function details of an OpenAI-format function tool call."""
 
     name: str
     arguments: str
 
 
 @dataclass(slots=True)
+class ToolCallCustomInput:
+    """The details of an OpenAI-format custom tool call."""
+
+    name: str
+    input: str
+
+
+@dataclass(slots=True)
 class ToolCallInput:
-    """A single tool call in OpenAI Chat Completions format."""
+    """A single tool call in OpenAI Chat Completions format.
+
+    Set either `function` or `custom` depending on the tool type.
+    """
 
     id: str
-    function: ToolCallFuncInput
     type: str = "function"
+    function: ToolCallFuncInput | None = None
+    custom: ToolCallCustomInput | None = None
 
 
 @dataclass(slots=True)

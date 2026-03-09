@@ -7,6 +7,7 @@ from .memory import (
     RetrievalConfig,
     SearchResults,
     StringContent,
+    ToolCallCustomInput,
     ToolCallFuncInput,
     ToolCallInput,
 )
@@ -25,6 +26,7 @@ __all__ = [
     "RunStatus",
     "SearchResults",
     "StringContent",
+    "ToolCallCustomInput",
     "ToolCallFuncInput",
     "ToolCallInput",
 ]
