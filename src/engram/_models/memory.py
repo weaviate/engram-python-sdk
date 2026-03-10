@@ -21,21 +21,48 @@ class StringContent:
 
 
 @dataclass(slots=True)
-class ToolCallMetadata:
-    """Tool call metadata."""
+class ToolCallFuncInput:
+    """The function details of an OpenAI-format function tool call."""
 
     name: str
+    arguments: str
+
+
+@dataclass(slots=True)
+class ToolCallCustomInput:
+    """The details of an OpenAI-format custom tool call."""
+
+    name: str
+    input: str
+
+
+@dataclass(slots=True)
+class ToolCallInput:
+    """A single tool call in OpenAI Chat Completions format.
+
+    Set either `function` or `custom` depending on the tool type.
+    """
+
     id: str
+    type: str = "function"
+    function: ToolCallFuncInput | None = None
+    custom: ToolCallCustomInput | None = None
 
 
 @dataclass(slots=True)
 class MessageContent:
-    """A message in a conversation."""
+    """A message in a conversation using the OpenAI Chat Completions format.
 
-    role: Literal["user", "assistant", "system"]
-    content: str
+    - 'tool' role (tool results) is mapped to 'user' by the server.
+    - 'developer' role is mapped to 'system' by the server.
+    """
+
+    role: Literal["user", "assistant", "system", "tool", "developer"]
+    content: str = ""
     created_at: str | None = None
-    tool_call_metadata: ToolCallMetadata | None = None
+    tool_call_id: str | None = None
+    name: str | None = None
+    tool_calls: list[ToolCallInput] | None = None
 
 
 @dataclass(slots=True)

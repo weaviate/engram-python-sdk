@@ -10,7 +10,9 @@ from ._models import (
     RunStatus,
     SearchResults,
     StringContent,
-    ToolCallMetadata,
+    ToolCallCustomInput,
+    ToolCallFuncInput,
+    ToolCallInput,
 )
 from .async_client import AsyncEngramClient
 from .client import EngramClient
@@ -43,7 +45,9 @@ __all__ = [
     "RunStatus",
     "SearchResults",
     "StringContent",
-    "ToolCallMetadata",
+    "ToolCallCustomInput",
+    "ToolCallFuncInput",
+    "ToolCallInput",
     "ValidationError",
     "__version__",
 ]
