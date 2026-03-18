@@ -2,6 +2,7 @@ from engram._models import (
     ConversationContent,
     MessageContent,
     PreExtractedContent,
+    PreExtractedItem,
     RetrievalConfig,
     StringContent,
     ToolCallCustomInput,
@@ -28,7 +29,7 @@ def test_build_add_body_str() -> None:
         conversation_id=None,
         group=None,
     )
-    assert body == {"content": {"type": "string", "content": "hello world"}}
+    assert body == {"input": {"string": {"content": ["hello world"]}}}
 
 
 def test_build_add_body_str_with_options() -> None:
@@ -39,7 +40,7 @@ def test_build_add_body_str_with_options() -> None:
         group="g1",
     )
     assert body == {
-        "content": {"type": "string", "content": "hello"},
+        "input": {"string": {"content": ["hello"]}},
         "user_id": "u1",
         "conversation_id": "c1",
         "group": "g1",
@@ -48,13 +49,13 @@ def test_build_add_body_str_with_options() -> None:
 
 def test_build_add_body_pre_extracted() -> None:
     body = build_add_body(
-        PreExtractedContent(content="fact", topic="topic"),
+        PreExtractedContent(items=[PreExtractedItem(content="fact", topic="topic")]),
         user_id=None,
         conversation_id=None,
         group=None,
     )
     assert body == {
-        "content": {"type": "pre_extracted", "content": "fact", "topic": "topic"},
+        "input": {"pre_extracted": {"items": [{"content": "fact", "topic": "topic"}]}},
     }
 
 
@@ -70,10 +71,7 @@ def test_build_add_body_conversation() -> None:
         group=None,
     )
     assert body == {
-        "content": {
-            "type": "conversation",
-            "conversation": {"messages": messages},
-        },
+        "input": {"conversation": {"messages": messages}},
         "user_id": "u1",
         "conversation_id": "c1",
     }
@@ -86,7 +84,7 @@ def test_build_add_body_string_content() -> None:
         conversation_id=None,
         group=None,
     )
-    assert body == {"content": {"type": "string", "content": "hello world"}}
+    assert body == {"input": {"string": {"content": ["hello world"]}}}
 
 
 def test_build_add_body_string_content_with_options() -> None:
@@ -97,7 +95,7 @@ def test_build_add_body_string_content_with_options() -> None:
         group="g1",
     )
     assert body == {
-        "content": {"type": "string", "content": "hello"},
+        "input": {"string": {"content": ["hello"]}},
         "user_id": "u1",
         "conversation_id": "c1",
         "group": "g1",
@@ -116,8 +114,7 @@ def test_build_add_body_conversation_content() -> None:
         group=None,
     )
     assert body == {
-        "content": {
-            "type": "conversation",
+        "input": {
             "conversation": {
                 "messages": [
                     {"role": "user", "content": "hi"},
@@ -143,7 +140,7 @@ def test_build_add_body_conversation_content_with_metadata() -> None:
         conversation_id=None,
         group=None,
     )
-    conv = body["content"]["conversation"]
+    conv = body["input"]["conversation"]
     assert conv["metadata"] == {"session_id": "s1"}
     assert conv["created_at"] == "2024-01-01T00:00:00Z"
     assert conv["updated_at"] == "2024-01-02T00:00:00Z"
@@ -157,7 +154,7 @@ def test_build_add_body_conversation_content_with_message_timestamps() -> None:
         conversation_id=None,
         group=None,
     )
-    msg = body["content"]["conversation"]["messages"][0]
+    msg = body["input"]["conversation"]["messages"][0]
     assert msg["created_at"] == "2024-01-01T00:00:00Z"
     assert "tool_call_metadata" not in msg
 
@@ -179,7 +176,7 @@ def test_build_add_body_conversation_content_with_tool_calls() -> None:
         conversation_id=None,
         group=None,
     )
-    msg = body["content"]["conversation"]["messages"][0]
+    msg = body["input"]["conversation"]["messages"][0]
     assert msg["tool_calls"] == [
         {"id": "tc1", "type": "function", "function": {"name": "search", "arguments": '{"q":"x"}'}}
     ]
@@ -204,7 +201,7 @@ def test_build_add_body_conversation_content_with_custom_tool_calls() -> None:
         conversation_id=None,
         group=None,
     )
-    msg = body["content"]["conversation"]["messages"][0]
+    msg = body["input"]["conversation"]["messages"][0]
     assert msg["tool_calls"] == [
         {"id": "tc2", "type": "custom", "custom": {"name": "my_tool", "input": "some input"}}
     ]
@@ -218,7 +215,7 @@ def test_build_add_body_conversation_content_with_tool_role() -> None:
         conversation_id=None,
         group=None,
     )
-    msg = body["content"]["conversation"]["messages"][0]
+    msg = body["input"]["conversation"]["messages"][0]
     assert msg["role"] == "tool"
     assert msg["tool_call_id"] == "tc1"
     assert msg["name"] == "search"
@@ -233,7 +230,7 @@ def test_build_add_body_conversation_content_with_developer_role() -> None:
         conversation_id=None,
         group=None,
     )
-    msg = body["content"]["conversation"]["messages"][0]
+    msg = body["input"]["conversation"]["messages"][0]
     assert msg["role"] == "developer"
     assert msg["content"] == "You are a helpful assistant."
 

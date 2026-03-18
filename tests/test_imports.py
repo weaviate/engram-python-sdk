@@ -14,6 +14,7 @@ def test_public_imports() -> None:
         Memory,
         MessageContent,
         PreExtractedContent,
+        PreExtractedItem,
         RetrievalConfig,
         Run,
         RunStatus,
@@ -37,6 +38,7 @@ def test_public_imports() -> None:
     assert isinstance(RunStatus, type)
     assert isinstance(SearchResults, type)
     assert isinstance(PreExtractedContent, type)
+    assert isinstance(PreExtractedItem, type)
     assert isinstance(RetrievalConfig, type)
     assert isinstance(CommittedOperation, type)
     assert isinstance(CommittedOperations, type)
@@ -61,6 +63,7 @@ def test_public_imports() -> None:
         "Memory",
         "MessageContent",
         "PreExtractedContent",
+        "PreExtractedItem",
         "RetrievalConfig",
         "Run",
         "RunStatus",
