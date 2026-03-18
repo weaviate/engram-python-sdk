@@ -21,21 +21,20 @@ def _serialize_tool_call(tc: ToolCallInput) -> dict[str, Any]:
     return out
 
 
-def _serialize_content(content: AddContent) -> dict[str, Any]:
+def _serialize_input(content: AddContent) -> dict[str, Any]:
     """Build the content envelope with the type discriminator."""
     if isinstance(content, str):
-        return {"type": "string", "content": content}
+        return {"string": {"content": [content]}}
     if isinstance(content, StringContent):
-        return {"type": "string", "content": content.content}
+        if isinstance(content.content, list):
+            return {"string": {"content": content.content}}
+        else:
+            return {"string": {"content": [content.content]}}
     if isinstance(content, PreExtractedContent):
-        return {
-            "type": "pre_extracted",
-            "content": content.content,
-            "topic": content.topic,
-        }
+        items = [{"content": item.content, "topic": item.topic} for item in content.items]
+        return {"pre_extracted": {"items": items}}
     if isinstance(content, list):
         return {
-            "type": "conversation",
             "conversation": {"messages": content},
         }
     if isinstance(content, ConversationContent):
@@ -63,7 +62,7 @@ def _serialize_conversation_content(content: ConversationContent) -> dict[str, A
         conversation["created_at"] = content.created_at
     if content.updated_at is not None:
         conversation["updated_at"] = content.updated_at
-    return {"type": "conversation", "conversation": conversation}
+    return {"conversation": conversation}
 
 
 def build_add_body(
@@ -73,7 +72,7 @@ def build_add_body(
     conversation_id: str | None,
     group: str | None,
 ) -> dict[str, Any]:
-    body: dict[str, Any] = {"content": _serialize_content(content)}
+    body: dict[str, Any] = {"input": _serialize_input(content)}
     if user_id is not None:
         body["user_id"] = user_id
     if conversation_id is not None:

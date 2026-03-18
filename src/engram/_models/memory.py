@@ -7,7 +7,16 @@ from typing import Any, Literal, TypeAlias
 
 @dataclass(slots=True)
 class PreExtractedContent:
-    """Pre-extracted content that bypasses the extraction pipeline."""
+    """Pre-extracted content that skips the extraction step continues through the pipeline as-is.
+    Each individual item represents a separate memory.
+    """
+
+    items: list[PreExtractedItem]
+
+
+@dataclass(slots=True)
+class PreExtractedItem:
+    """A single pre-extracted memory."""
 
     content: str
     topic: str
@@ -15,9 +24,9 @@ class PreExtractedContent:
 
 @dataclass(slots=True)
 class StringContent:
-    """String content that bypasses the extraction pipeline."""
+    """String content to extract memories from."""
 
-    content: str
+    content: str | list[str]
 
 
 @dataclass(slots=True)
