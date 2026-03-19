@@ -1,10 +1,10 @@
 from engram._models import (
-    ConversationContent,
-    MessageContent,
-    PreExtractedContent,
+    ConversationInput,
+    MessageInput,
+    PreExtractedInput,
     PreExtractedItem,
     RetrievalConfig,
-    StringContent,
+    StringInput,
     ToolCallCustomInput,
     ToolCallFuncInput,
     ToolCallInput,
@@ -49,7 +49,7 @@ def test_build_add_body_str_with_options() -> None:
 
 def test_build_add_body_pre_extracted() -> None:
     body = build_add_body(
-        PreExtractedContent(items=[PreExtractedItem(content="fact", topic="topic")]),
+        PreExtractedInput(items=[PreExtractedItem(content="fact", topic="topic")]),
         user_id=None,
         conversation_id=None,
         group=None,
@@ -79,7 +79,7 @@ def test_build_add_body_conversation() -> None:
 
 def test_build_add_body_string_content() -> None:
     body = build_add_body(
-        StringContent(content="hello world"),
+        StringInput(content="hello world"),
         user_id=None,
         conversation_id=None,
         group=None,
@@ -89,7 +89,7 @@ def test_build_add_body_string_content() -> None:
 
 def test_build_add_body_string_content_with_options() -> None:
     body = build_add_body(
-        StringContent(content="hello"),
+        StringInput(content="hello"),
         user_id="u1",
         conversation_id="c1",
         group="g1",
@@ -104,11 +104,11 @@ def test_build_add_body_string_content_with_options() -> None:
 
 def test_build_add_body_conversation_content() -> None:
     messages = [
-        MessageContent(role="user", content="hi"),
-        MessageContent(role="assistant", content="hello"),
+        MessageInput(role="user", content="hi"),
+        MessageInput(role="assistant", content="hello"),
     ]
     body = build_add_body(
-        ConversationContent(messages=messages),
+        ConversationInput(messages=messages),
         user_id="u1",
         conversation_id="c1",
         group=None,
@@ -128,9 +128,9 @@ def test_build_add_body_conversation_content() -> None:
 
 
 def test_build_add_body_conversation_content_with_metadata() -> None:
-    messages = [MessageContent(role="user", content="hi")]
+    messages = [MessageInput(role="user", content="hi")]
     body = build_add_body(
-        ConversationContent(
+        ConversationInput(
             messages=messages,
             metadata={"session_id": "s1"},
             created_at="2024-01-01T00:00:00Z",
@@ -147,9 +147,9 @@ def test_build_add_body_conversation_content_with_metadata() -> None:
 
 
 def test_build_add_body_conversation_content_with_message_timestamps() -> None:
-    messages = [MessageContent(role="user", content="hi", created_at="2024-01-01T00:00:00Z")]
+    messages = [MessageInput(role="user", content="hi", created_at="2024-01-01T00:00:00Z")]
     body = build_add_body(
-        ConversationContent(messages=messages),
+        ConversationInput(messages=messages),
         user_id=None,
         conversation_id=None,
         group=None,
@@ -161,7 +161,7 @@ def test_build_add_body_conversation_content_with_message_timestamps() -> None:
 
 def test_build_add_body_conversation_content_with_tool_calls() -> None:
     messages = [
-        MessageContent(
+        MessageInput(
             role="assistant",
             tool_calls=[
                 ToolCallInput(
@@ -171,7 +171,7 @@ def test_build_add_body_conversation_content_with_tool_calls() -> None:
         )
     ]
     body = build_add_body(
-        ConversationContent(messages=messages),
+        ConversationInput(messages=messages),
         user_id=None,
         conversation_id=None,
         group=None,
@@ -184,7 +184,7 @@ def test_build_add_body_conversation_content_with_tool_calls() -> None:
 
 def test_build_add_body_conversation_content_with_custom_tool_calls() -> None:
     messages = [
-        MessageContent(
+        MessageInput(
             role="assistant",
             tool_calls=[
                 ToolCallInput(
@@ -196,7 +196,7 @@ def test_build_add_body_conversation_content_with_custom_tool_calls() -> None:
         )
     ]
     body = build_add_body(
-        ConversationContent(messages=messages),
+        ConversationInput(messages=messages),
         user_id=None,
         conversation_id=None,
         group=None,
@@ -208,9 +208,9 @@ def test_build_add_body_conversation_content_with_custom_tool_calls() -> None:
 
 
 def test_build_add_body_conversation_content_with_tool_role() -> None:
-    messages = [MessageContent(role="tool", content="result", tool_call_id="tc1", name="search")]
+    messages = [MessageInput(role="tool", content="result", tool_call_id="tc1", name="search")]
     body = build_add_body(
-        ConversationContent(messages=messages),
+        ConversationInput(messages=messages),
         user_id=None,
         conversation_id=None,
         group=None,
@@ -223,9 +223,9 @@ def test_build_add_body_conversation_content_with_tool_role() -> None:
 
 
 def test_build_add_body_conversation_content_with_developer_role() -> None:
-    messages = [MessageContent(role="developer", content="You are a helpful assistant.")]
+    messages = [MessageInput(role="developer", content="You are a helpful assistant.")]
     body = build_add_body(
-        ConversationContent(messages=messages),
+        ConversationInput(messages=messages),
         user_id=None,
         conversation_id=None,
         group=None,

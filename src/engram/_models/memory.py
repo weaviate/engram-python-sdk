@@ -6,8 +6,8 @@ from typing import Any, Literal, TypeAlias
 
 
 @dataclass(slots=True)
-class PreExtractedContent:
-    """Pre-extracted content that skips the extraction step continues through the pipeline as-is.
+class PreExtractedInput:
+    """Pre-extracted input that skips the extraction step continues through the pipeline as-is.
     Each individual item represents a separate memory.
     """
 
@@ -23,8 +23,8 @@ class PreExtractedItem:
 
 
 @dataclass(slots=True)
-class StringContent:
-    """String content to extract memories from."""
+class StringInput:
+    """String input to extract memories from."""
 
     content: str | list[str]
 
@@ -59,7 +59,7 @@ class ToolCallInput:
 
 
 @dataclass(slots=True)
-class MessageContent:
+class MessageInput:
     """A message in a conversation using the OpenAI Chat Completions format.
 
     - 'tool' role (tool results) is mapped to 'user' by the server.
@@ -75,18 +75,18 @@ class MessageContent:
 
 
 @dataclass(slots=True)
-class ConversationContent:
-    """Conversation content that bypasses the extraction pipeline."""
+class ConversationInput:
+    """Conversation input that bypasses the extraction pipeline."""
 
-    messages: list[MessageContent]
+    messages: list[MessageInput]
     metadata: dict[str, Any] | None = None
     created_at: str | None = None
     updated_at: str | None = None
 
 
 # Type alias for the content argument to memories.add()
-AddContent: TypeAlias = (
-    str | list[dict[str, str]] | PreExtractedContent | ConversationContent | StringContent
+AddInput: TypeAlias = (
+    str | list[dict[str, str]] | PreExtractedInput | ConversationInput | StringInput
 )
 
 

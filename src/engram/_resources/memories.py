@@ -3,7 +3,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from .._http import AsyncHttpTransport, HttpTransport
-from .._models import AddContent, Memory, RetrievalConfig, Run, SearchResults
+from .._models import AddInput, Memory, RetrievalConfig, Run, SearchResults
 from .._serialization import (
     build_add_body,
     build_memory_params,
@@ -29,14 +29,14 @@ class Memories:
 
     def add(
         self,
-        content: AddContent,
+        input_data: AddInput,
         *,
         user_id: str | None = None,
         conversation_id: str | None = None,
         group: str | None = None,
     ) -> Run:
         body = build_add_body(
-            content,
+            input_data,
             user_id=user_id,
             conversation_id=conversation_id,
             group=group,
@@ -101,14 +101,14 @@ class AsyncMemories:
 
     async def add(
         self,
-        content: AddContent,
+        input_data: AddInput,
         *,
         user_id: str | None = None,
         conversation_id: str | None = None,
         group: str | None = None,
     ) -> Run:
         body = build_add_body(
-            content,
+            input_data,
             user_id=user_id,
             conversation_id=conversation_id,
             group=group,
