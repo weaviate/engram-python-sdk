@@ -6,11 +6,12 @@ import pytest
 
 from engram._http import AsyncHttpTransport
 from engram._models import (
-    ConversationContent,
-    MessageContent,
-    PreExtractedContent,
+    ConversationInput,
+    MessageInput,
+    PreExtractedInput,
+    PreExtractedItem,
     RetrievalConfig,
-    StringContent,
+    StringInput,
     ToolCallFuncInput,
     ToolCallInput,
 )
@@ -117,7 +118,7 @@ async def test_add_str() -> None:
 async def test_add_pre_extracted() -> None:
     client = _make_client(body={"run_id": "r2", "status": "pending"})
     result = await client.memories.add(
-        PreExtractedContent(content="fact", topic="topic"),
+        PreExtractedInput(items=[PreExtractedItem(content="fact", topic="topic")]),
         user_id="u1",
     )
     assert result.run_id == "r2"
@@ -146,16 +147,65 @@ async def test_add_sends_content_envelope() -> None:
     await client.memories.add("hello", user_id="u1", group="g1")
     body = json.loads(captured[0].content)
     assert body == {
-        "content": {"type": "string", "content": "hello"},
+        "input": {"string": {"content": ["hello"]}},
         "user_id": "u1",
         "group": "g1",
     }
 
 
 @pytest.mark.asyncio
+async def test_add_multiple_strings() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json={"run_id": "r1", "status": "pending"})
+
+    client = _make_client_with_handler(handler)
+    await client.memories.add(StringInput(content=["first", "second"]), user_id="u1")
+    body = json.loads(captured[0].content)
+    assert body == {
+        "input": {"string": {"content": ["first", "second"]}},
+        "user_id": "u1",
+    }
+
+
+@pytest.mark.asyncio
+async def test_add_multiple_pre_extracted_items() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json={"run_id": "r1", "status": "pending"})
+
+    client = _make_client_with_handler(handler)
+    await client.memories.add(
+        PreExtractedInput(
+            items=[
+                PreExtractedItem(content="fact one", topic="topic_a"),
+                PreExtractedItem(content="fact two", topic="topic_b"),
+            ]
+        ),
+        user_id="u1",
+    )
+    body = json.loads(captured[0].content)
+    assert body == {
+        "input": {
+            "pre_extracted": {
+                "items": [
+                    {"content": "fact one", "topic": "topic_a"},
+                    {"content": "fact two", "topic": "topic_b"},
+                ]
+            }
+        },
+        "user_id": "u1",
+    }
+
+
+@pytest.mark.asyncio
 async def test_add_string_content() -> None:
     client = _make_client(body={"run_id": "r4", "status": "pending"})
-    result = await client.memories.add(StringContent(content="hello"), user_id="u1")
+    result = await client.memories.add(StringInput(content="hello"), user_id="u1")
     assert result.run_id == "r4"
 
 
@@ -168,10 +218,10 @@ async def test_add_string_content_sends_correct_envelope() -> None:
         return httpx.Response(200, json={"run_id": "r1", "status": "pending"})
 
     client = _make_client_with_handler(handler)
-    await client.memories.add(StringContent(content="hello"), user_id="u1", group="g1")
+    await client.memories.add(StringInput(content="hello"), user_id="u1", group="g1")
     body = json.loads(captured[0].content)
     assert body == {
-        "content": {"type": "string", "content": "hello"},
+        "input": {"string": {"content": ["hello"]}},
         "user_id": "u1",
         "group": "g1",
     }
@@ -181,7 +231,7 @@ async def test_add_string_content_sends_correct_envelope() -> None:
 async def test_add_conversation_content() -> None:
     client = _make_client(body={"run_id": "r5", "status": "pending"})
     result = await client.memories.add(
-        ConversationContent(messages=[MessageContent(role="user", content="hi")]),
+        ConversationInput(messages=[MessageInput(role="user", content="hi")]),
         user_id="u1",
         conversation_id="c1",
     )
@@ -198,10 +248,10 @@ async def test_add_conversation_content_sends_correct_envelope() -> None:
 
     client = _make_client_with_handler(handler)
     await client.memories.add(
-        ConversationContent(
+        ConversationInput(
             messages=[
-                MessageContent(role="user", content="hi"),
-                MessageContent(
+                MessageInput(role="user", content="hi"),
+                MessageInput(
                     role="assistant",
                     tool_calls=[
                         ToolCallInput(
@@ -215,8 +265,7 @@ async def test_add_conversation_content_sends_correct_envelope() -> None:
         conversation_id="c1",
     )
     body = json.loads(captured[0].content)
-    assert body["content"]["type"] == "conversation"
-    conv = body["content"]["conversation"]
+    conv = body["input"]["conversation"]
     assert conv["metadata"] == {"session_id": "s1"}
     assert conv["messages"][1]["tool_calls"] == [
         {"id": "tc1", "type": "function", "function": {"name": "search", "arguments": "{}"}}

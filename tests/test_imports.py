@@ -7,18 +7,19 @@ def test_public_imports() -> None:
         CommittedOperation,
         CommittedOperations,
         ConnectionError,
-        ConversationContent,
+        ConversationInput,
         EngramClient,
         EngramError,
         EngramTimeoutError,
         Memory,
-        MessageContent,
-        PreExtractedContent,
+        MessageInput,
+        PreExtractedInput,
+        PreExtractedItem,
         RetrievalConfig,
         Run,
         RunStatus,
         SearchResults,
-        StringContent,
+        StringInput,
         ToolCallCustomInput,
         ToolCallFuncInput,
         ToolCallInput,
@@ -36,13 +37,14 @@ def test_public_imports() -> None:
     assert isinstance(Run, type)
     assert isinstance(RunStatus, type)
     assert isinstance(SearchResults, type)
-    assert isinstance(PreExtractedContent, type)
+    assert isinstance(PreExtractedInput, type)
+    assert isinstance(PreExtractedItem, type)
     assert isinstance(RetrievalConfig, type)
     assert isinstance(CommittedOperation, type)
     assert isinstance(CommittedOperations, type)
-    assert isinstance(ConversationContent, type)
-    assert isinstance(MessageContent, type)
-    assert isinstance(StringContent, type)
+    assert isinstance(ConversationInput, type)
+    assert isinstance(MessageInput, type)
+    assert isinstance(StringInput, type)
     assert isinstance(ToolCallCustomInput, type)
     assert isinstance(ToolCallFuncInput, type)
     assert isinstance(ToolCallInput, type)
@@ -54,18 +56,19 @@ def test_public_imports() -> None:
         "CommittedOperation",
         "CommittedOperations",
         "ConnectionError",
-        "ConversationContent",
+        "ConversationInput",
         "EngramClient",
         "EngramError",
         "EngramTimeoutError",
         "Memory",
-        "MessageContent",
-        "PreExtractedContent",
+        "MessageInput",
+        "PreExtractedInput",
+        "PreExtractedItem",
         "RetrievalConfig",
         "Run",
         "RunStatus",
         "SearchResults",
-        "StringContent",
+        "StringInput",
         "ToolCallCustomInput",
         "ToolCallFuncInput",
         "ToolCallInput",
