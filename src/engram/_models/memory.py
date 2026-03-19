@@ -84,7 +84,7 @@ class ConversationInput:
     updated_at: str | None = None
 
 
-# Type alias for the content argument to memories.add()
+# Type alias for the input_data argument to memories.add()
 AddInput: TypeAlias = (
     str | list[dict[str, str]] | PreExtractedInput | ConversationInput | StringInput
 )
