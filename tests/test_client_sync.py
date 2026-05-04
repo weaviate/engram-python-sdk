@@ -14,6 +14,7 @@ from engram._models import (
     StringInput,
     ToolCallFuncInput,
     ToolCallInput,
+    Topic,
 )
 from engram.client import DEFAULT_BASE_URL, EngramClient
 from engram.errors import APIError, AuthenticationError, ValidationError
@@ -386,6 +387,62 @@ def test_search_no_retrieval_config_by_default() -> None:
     client.memories.search(query="test")
     body = json.loads(captured[0].content)
     assert "retrieval_config" not in body
+
+
+# ── properties support ──────────────────────────────────────────────────
+
+
+def test_add_sends_properties() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json={"run_id": "r1", "status": "pending"})
+
+    client = _make_client_with_handler(handler)
+    client.memories.add(
+        "hello",
+        user_id="u1",
+        properties={"region": "eu", "tier": "pro"},
+    )
+    body = json.loads(captured[0].content)
+    assert body["properties"] == {"region": "eu", "tier": "pro"}
+
+
+def test_search_sends_properties_and_topic_filters() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json={"memories": [], "total": 0})
+
+    client = _make_client_with_handler(handler)
+    client.memories.search(
+        query="q",
+        topics=[
+            "plain",
+            Topic(name="scoped", properties={"region": "eu"}),
+            Topic(name="cleared", properties={"region": None}),
+        ],
+        properties={"tier": "pro"},
+    )
+    body = json.loads(captured[0].content)
+    assert body["properties"] == {"tier": "pro"}
+    assert body["topics"] == [
+        "plain",
+        {"name": "scoped", "properties": {"region": "eu"}},
+        {"name": "cleared", "properties": {"region": None}},
+    ]
+
+
+def test_get_memory_returns_properties() -> None:
+    response_body = {
+        **SAMPLE_MEMORY_RESPONSE,
+        "properties": {"region": "eu", "tier": "pro"},
+    }
+    client = _make_client(body=response_body)
+    mem = client.memories.get("m1")
+    assert mem.properties == {"region": "eu", "tier": "pro"}
 
 
 # ── runs.get ────────────────────────────────────────────────────────────

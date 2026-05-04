@@ -1,9 +1,17 @@
 from __future__ import annotations
 
+from typing import TypeAlias
 from uuid import UUID
 
 from .._http import AsyncHttpTransport, HttpTransport
-from .._models import AddInput, Memory, RetrievalConfig, Run, SearchResults
+from .._models import (
+    AddInput,
+    Memory,
+    RetrievalConfig,
+    Run,
+    SearchResults,
+    TopicSelector,
+)
 from .._serialization import (
     build_add_body,
     build_memory_params,
@@ -15,6 +23,8 @@ from .._serialization import (
 
 _MEMORIES_PATH = "/v1/memories"
 _MEMORIES_SEARCH_PATH = "/v1/memories/search"
+
+_Topics: TypeAlias = list[TopicSelector] | None
 
 
 def _memory_path(memory_id: str | UUID) -> str:
@@ -34,12 +44,14 @@ class Memories:
         user_id: str | None = None,
         conversation_id: str | None = None,
         group: str | None = None,
+        properties: dict[str, str] | None = None,
     ) -> Run:
         body = build_add_body(
             input_data,
             user_id=user_id,
             conversation_id=conversation_id,
             group=group,
+            properties=properties,
         )
         data = self._transport.request("POST", _MEMORIES_PATH, json=body)
         return parse_run(data)
@@ -75,11 +87,12 @@ class Memories:
         self,
         *,
         query: str,
-        topics: list[str] | None = None,
+        topics: _Topics = None,
         user_id: str | None = None,
         conversation_id: str | None = None,
         group: str | None = None,
         retrieval_config: RetrievalConfig | None = None,
+        properties: dict[str, str] | None = None,
     ) -> SearchResults:
         body = build_search_body(
             query=query,
@@ -88,6 +101,7 @@ class Memories:
             conversation_id=conversation_id,
             group=group,
             retrieval_config=retrieval_config,
+            properties=properties,
         )
         data = self._transport.request("POST", _MEMORIES_SEARCH_PATH, json=body)
         return parse_search_results(data)
@@ -106,12 +120,14 @@ class AsyncMemories:
         user_id: str | None = None,
         conversation_id: str | None = None,
         group: str | None = None,
+        properties: dict[str, str] | None = None,
     ) -> Run:
         body = build_add_body(
             input_data,
             user_id=user_id,
             conversation_id=conversation_id,
             group=group,
+            properties=properties,
         )
         data = await self._transport.request("POST", _MEMORIES_PATH, json=body)
         return parse_run(data)
@@ -147,11 +163,12 @@ class AsyncMemories:
         self,
         *,
         query: str,
-        topics: list[str] | None = None,
+        topics: _Topics = None,
         user_id: str | None = None,
         conversation_id: str | None = None,
         group: str | None = None,
         retrieval_config: RetrievalConfig | None = None,
+        properties: dict[str, str] | None = None,
     ) -> SearchResults:
         body = build_search_body(
             query=query,
@@ -160,6 +177,7 @@ class AsyncMemories:
             conversation_id=conversation_id,
             group=group,
             retrieval_config=retrieval_config,
+            properties=properties,
         )
         data = await self._transport.request("POST", _MEMORIES_SEARCH_PATH, json=body)
         return parse_search_results(data)

@@ -8,6 +8,7 @@ from engram._models import (
     ToolCallCustomInput,
     ToolCallFuncInput,
     ToolCallInput,
+    Topic,
 )
 from engram._serialization import (
     build_add_body,
@@ -281,6 +282,82 @@ def test_build_search_body_full() -> None:
     assert body["retrieval_config"]["limit"] == 5
 
 
+# ── properties on add ───────────────────────────────────────────────────
+
+
+def test_build_add_body_with_properties() -> None:
+    body = build_add_body(
+        "hello",
+        user_id=None,
+        conversation_id=None,
+        group=None,
+        properties={"region": "eu", "tier": "pro"},
+    )
+    assert body == {
+        "input": {"string": {"content": ["hello"]}},
+        "properties": {"region": "eu", "tier": "pro"},
+    }
+
+
+def test_build_add_body_properties_none_omitted() -> None:
+    body = build_add_body(
+        "hello",
+        user_id=None,
+        conversation_id=None,
+        group=None,
+        properties=None,
+    )
+    assert "properties" not in body
+
+
+# ── properties + topic filters on search ────────────────────────────────
+
+
+def test_build_search_body_with_properties() -> None:
+    body = build_search_body(
+        query="q",
+        topics=None,
+        user_id=None,
+        conversation_id=None,
+        group=None,
+        retrieval_config=None,
+        properties={"region": "eu"},
+    )
+    assert body == {"query": "q", "properties": {"region": "eu"}}
+
+
+def test_build_search_body_with_topic_filter() -> None:
+    body = build_search_body(
+        query="q",
+        topics=[
+            "plain",
+            Topic(name="scoped", properties={"region": "eu"}),
+            Topic(name="cleared", properties={"region": None}),
+        ],
+        user_id=None,
+        conversation_id=None,
+        group=None,
+        retrieval_config=None,
+    )
+    assert body["topics"] == [
+        "plain",
+        {"name": "scoped", "properties": {"region": "eu"}},
+        {"name": "cleared", "properties": {"region": None}},
+    ]
+
+
+def test_build_search_body_topic_filter_without_properties() -> None:
+    body = build_search_body(
+        query="q",
+        topics=[Topic(name="t1")],
+        user_id=None,
+        conversation_id=None,
+        group=None,
+        retrieval_config=None,
+    )
+    assert body["topics"] == [{"name": "t1"}]
+
+
 # ── parse_run ───────────────────────────────────────────────────────────
 
 
@@ -325,11 +402,13 @@ def test_parse_memory_with_optional_fields() -> None:
         "conversation_id": "c1",
         "tags": ["x"],
         "score": 0.95,
+        "properties": {"region": "eu", "tier": "pro"},
     }
     mem = parse_memory(data)
     assert mem.user_id == "u1"
     assert mem.tags == ["x"]
     assert mem.score == 0.95
+    assert mem.properties == {"region": "eu", "tier": "pro"}
 
 
 # ── parse_search_results ────────────────────────────────────────────────

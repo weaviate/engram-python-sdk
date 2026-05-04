@@ -33,6 +33,7 @@ def parse_memory(data: dict[str, Any]) -> Memory:
         conversation_id=data.get("conversation_id"),
         tags=data.get("tags"),
         score=data.get("score"),
+        properties=data.get("properties"),
     )
 
 

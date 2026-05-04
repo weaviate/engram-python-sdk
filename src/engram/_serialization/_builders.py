@@ -9,6 +9,8 @@ from .._models import (
     RetrievalConfig,
     StringInput,
     ToolCallInput,
+    Topic,
+    TopicSelector,
 )
 
 
@@ -65,12 +67,30 @@ def _serialize_conversation_content(content: ConversationInput) -> dict[str, Any
     return {"conversation": conversation}
 
 
+def _serialize_topic(topic: TopicSelector) -> str | dict[str, Any]:
+    if isinstance(topic, str):
+        return topic
+    if isinstance(topic, Topic):
+        out: dict[str, Any] = {"name": topic.name}
+        if topic.properties is not None:
+            out["properties"] = dict(topic.properties)
+        return out
+    raise TypeError(f"Unsupported topic type: {type(topic)}")  # pragma: no cover
+
+
+def _serialize_topics(topics: list[TopicSelector] | None) -> list[str | dict[str, Any]] | None:
+    if topics is None:
+        return None
+    return [_serialize_topic(t) for t in topics]
+
+
 def build_add_body(
     input_data: AddInput,
     *,
     user_id: str | None,
     conversation_id: str | None,
     group: str | None,
+    properties: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     body: dict[str, Any] = {"input": _serialize_input(input_data)}
     if user_id is not None:
@@ -79,6 +99,8 @@ def build_add_body(
         body["conversation_id"] = conversation_id
     if group is not None:
         body["group"] = group
+    if properties is not None:
+        body["properties"] = dict(properties)
     return body
 
 
@@ -98,11 +120,12 @@ def build_memory_params(
 def build_search_body(
     *,
     query: str,
-    topics: list[str] | None,
+    topics: list[TopicSelector] | None,
     user_id: str | None,
     conversation_id: str | None,
     group: str | None,
     retrieval_config: RetrievalConfig | None,
+    properties: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     body: dict[str, Any] = {"query": query}
     if retrieval_config is not None:
@@ -110,12 +133,15 @@ def build_search_body(
             "retrieval_type": retrieval_config.retrieval_type,
             "limit": retrieval_config.limit,
         }
-    if topics is not None:
-        body["topics"] = topics
+    serialized_topics = _serialize_topics(topics)
+    if serialized_topics is not None:
+        body["topics"] = serialized_topics
     if user_id is not None:
         body["user_id"] = user_id
     if conversation_id is not None:
         body["conversation_id"] = conversation_id
     if group is not None:
         body["group"] = group
+    if properties is not None:
+        body["properties"] = dict(properties)
     return body
