@@ -131,7 +131,7 @@ def test_add_conversation() -> None:
     result = client.memories.add(
         [{"role": "user", "content": "hi"}],
         user_id="u1",
-        conversation_id="c1",
+        properties={"conversation_id": "c1"},
     )
     assert result.run_id == "r3"
 
@@ -162,11 +162,11 @@ def test_add_conversation_sends_correct_envelope() -> None:
 
     client = _make_client_with_handler(handler)
     messages = [{"role": "user", "content": "hi"}]
-    client.memories.add(messages, conversation_id="c1")
+    client.memories.add(messages, properties={"conversation_id": "c1"})
     body = json.loads(captured[0].content)
     assert body == {
         "input": {"conversation": {"messages": messages}},
-        "conversation_id": "c1",
+        "properties": {"conversation_id": "c1"},
     }
 
 
@@ -245,7 +245,7 @@ def test_add_conversation_content() -> None:
     result = client.memories.add(
         ConversationInput(messages=[MessageInput(role="user", content="hi")]),
         user_id="u1",
-        conversation_id="c1",
+        properties={"conversation_id": "c1"},
     )
     assert result.run_id == "r5"
 
@@ -273,7 +273,7 @@ def test_add_conversation_content_sends_correct_envelope() -> None:
             ],
             metadata={"session_id": "s1"},
         ),
-        conversation_id="c1",
+        properties={"conversation_id": "c1"},
     )
     body = json.loads(captured[0].content)
     conv = body["input"]["conversation"]
@@ -281,7 +281,7 @@ def test_add_conversation_content_sends_correct_envelope() -> None:
     assert conv["messages"][1]["tool_calls"] == [
         {"id": "tc1", "type": "function", "function": {"name": "search", "arguments": "{}"}}
     ]
-    assert body["conversation_id"] == "c1"
+    assert body["properties"] == {"conversation_id": "c1"}
 
 
 # ── memories.get ────────────────────────────────────────────────────────

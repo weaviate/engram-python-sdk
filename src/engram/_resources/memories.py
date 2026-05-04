@@ -42,14 +42,12 @@ class Memories:
         input_data: AddInput,
         *,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
         properties: dict[str, str] | None = None,
     ) -> Run:
         body = build_add_body(
             input_data,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
             properties=properties,
         )
@@ -89,7 +87,6 @@ class Memories:
         query: str,
         topics: _Topics = None,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
         retrieval_config: RetrievalConfig | None = None,
         properties: dict[str, str] | None = None,
@@ -98,7 +95,6 @@ class Memories:
             query=query,
             topics=topics,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
             retrieval_config=retrieval_config,
             properties=properties,
@@ -118,14 +114,12 @@ class AsyncMemories:
         input_data: AddInput,
         *,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
         properties: dict[str, str] | None = None,
     ) -> Run:
         body = build_add_body(
             input_data,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
             properties=properties,
         )
@@ -165,7 +159,6 @@ class AsyncMemories:
         query: str,
         topics: _Topics = None,
         user_id: str | None = None,
-        conversation_id: str | None = None,
         group: str | None = None,
         retrieval_config: RetrievalConfig | None = None,
         properties: dict[str, str] | None = None,
@@ -174,7 +167,6 @@ class AsyncMemories:
             query=query,
             topics=topics,
             user_id=user_id,
-            conversation_id=conversation_id,
             group=group,
             retrieval_config=retrieval_config,
             properties=properties,

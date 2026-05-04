@@ -27,7 +27,6 @@ def test_build_add_body_str() -> None:
     body = build_add_body(
         "hello world",
         user_id=None,
-        conversation_id=None,
         group=None,
     )
     assert body == {"input": {"string": {"content": ["hello world"]}}}
@@ -37,13 +36,11 @@ def test_build_add_body_str_with_options() -> None:
     body = build_add_body(
         "hello",
         user_id="u1",
-        conversation_id="c1",
         group="g1",
     )
     assert body == {
         "input": {"string": {"content": ["hello"]}},
         "user_id": "u1",
-        "conversation_id": "c1",
         "group": "g1",
     }
 
@@ -52,7 +49,6 @@ def test_build_add_body_pre_extracted() -> None:
     body = build_add_body(
         PreExtractedInput(items=[PreExtractedItem(content="fact", topic="topic")]),
         user_id=None,
-        conversation_id=None,
         group=None,
     )
     assert body == {
@@ -68,13 +64,11 @@ def test_build_add_body_conversation() -> None:
     body = build_add_body(
         messages,
         user_id="u1",
-        conversation_id="c1",
         group=None,
     )
     assert body == {
         "input": {"conversation": {"messages": messages}},
         "user_id": "u1",
-        "conversation_id": "c1",
     }
 
 
@@ -82,7 +76,6 @@ def test_build_add_body_string_content() -> None:
     body = build_add_body(
         StringInput(content="hello world"),
         user_id=None,
-        conversation_id=None,
         group=None,
     )
     assert body == {"input": {"string": {"content": ["hello world"]}}}
@@ -92,13 +85,11 @@ def test_build_add_body_string_content_with_options() -> None:
     body = build_add_body(
         StringInput(content="hello"),
         user_id="u1",
-        conversation_id="c1",
         group="g1",
     )
     assert body == {
         "input": {"string": {"content": ["hello"]}},
         "user_id": "u1",
-        "conversation_id": "c1",
         "group": "g1",
     }
 
@@ -111,7 +102,6 @@ def test_build_add_body_conversation_content() -> None:
     body = build_add_body(
         ConversationInput(messages=messages),
         user_id="u1",
-        conversation_id="c1",
         group=None,
     )
     assert body == {
@@ -124,7 +114,6 @@ def test_build_add_body_conversation_content() -> None:
             },
         },
         "user_id": "u1",
-        "conversation_id": "c1",
     }
 
 
@@ -138,7 +127,6 @@ def test_build_add_body_conversation_content_with_metadata() -> None:
             updated_at="2024-01-02T00:00:00Z",
         ),
         user_id=None,
-        conversation_id=None,
         group=None,
     )
     conv = body["input"]["conversation"]
@@ -152,7 +140,6 @@ def test_build_add_body_conversation_content_with_message_timestamps() -> None:
     body = build_add_body(
         ConversationInput(messages=messages),
         user_id=None,
-        conversation_id=None,
         group=None,
     )
     msg = body["input"]["conversation"]["messages"][0]
@@ -174,7 +161,6 @@ def test_build_add_body_conversation_content_with_tool_calls() -> None:
     body = build_add_body(
         ConversationInput(messages=messages),
         user_id=None,
-        conversation_id=None,
         group=None,
     )
     msg = body["input"]["conversation"]["messages"][0]
@@ -199,7 +185,6 @@ def test_build_add_body_conversation_content_with_custom_tool_calls() -> None:
     body = build_add_body(
         ConversationInput(messages=messages),
         user_id=None,
-        conversation_id=None,
         group=None,
     )
     msg = body["input"]["conversation"]["messages"][0]
@@ -213,7 +198,6 @@ def test_build_add_body_conversation_content_with_tool_role() -> None:
     body = build_add_body(
         ConversationInput(messages=messages),
         user_id=None,
-        conversation_id=None,
         group=None,
     )
     msg = body["input"]["conversation"]["messages"][0]
@@ -228,7 +212,6 @@ def test_build_add_body_conversation_content_with_developer_role() -> None:
     body = build_add_body(
         ConversationInput(messages=messages),
         user_id=None,
-        conversation_id=None,
         group=None,
     )
     msg = body["input"]["conversation"]["messages"][0]
@@ -260,7 +243,6 @@ def test_build_search_body_defaults() -> None:
         query="test",
         topics=None,
         user_id=None,
-        conversation_id=None,
         group=None,
         retrieval_config=None,
     )
@@ -272,7 +254,6 @@ def test_build_search_body_full() -> None:
         query="test",
         topics=["a", "b"],
         user_id="u1",
-        conversation_id="c1",
         group="g1",
         retrieval_config=RetrievalConfig(retrieval_type="vector", limit=5),
     )
@@ -289,7 +270,6 @@ def test_build_add_body_with_properties() -> None:
     body = build_add_body(
         "hello",
         user_id=None,
-        conversation_id=None,
         group=None,
         properties={"region": "eu", "tier": "pro"},
     )
@@ -303,7 +283,6 @@ def test_build_add_body_properties_none_omitted() -> None:
     body = build_add_body(
         "hello",
         user_id=None,
-        conversation_id=None,
         group=None,
         properties=None,
     )
@@ -318,7 +297,6 @@ def test_build_search_body_with_properties() -> None:
         query="q",
         topics=None,
         user_id=None,
-        conversation_id=None,
         group=None,
         retrieval_config=None,
         properties={"region": "eu"},
@@ -335,7 +313,6 @@ def test_build_search_body_with_topic_filter() -> None:
             Topic(name="cleared", properties={"region": None}),
         ],
         user_id=None,
-        conversation_id=None,
         group=None,
         retrieval_config=None,
     )
@@ -351,7 +328,6 @@ def test_build_search_body_topic_filter_without_properties() -> None:
         query="q",
         topics=[Topic(name="t1")],
         user_id=None,
-        conversation_id=None,
         group=None,
         retrieval_config=None,
     )
@@ -399,16 +375,15 @@ def test_parse_memory_with_optional_fields() -> None:
     data = {
         **SAMPLE_MEMORY,
         "user_id": "u1",
-        "conversation_id": "c1",
         "tags": ["x"],
         "score": 0.95,
-        "properties": {"region": "eu", "tier": "pro"},
+        "properties": {"region": "eu", "conversation_id": "c1"},
     }
     mem = parse_memory(data)
     assert mem.user_id == "u1"
     assert mem.tags == ["x"]
     assert mem.score == 0.95
-    assert mem.properties == {"region": "eu", "tier": "pro"}
+    assert mem.properties == {"region": "eu", "conversation_id": "c1"}
 
 
 # ── parse_search_results ────────────────────────────────────────────────

@@ -88,15 +88,12 @@ def build_add_body(
     input_data: AddInput,
     *,
     user_id: str | None,
-    conversation_id: str | None,
     group: str | None,
     properties: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     body: dict[str, Any] = {"input": _serialize_input(input_data)}
     if user_id is not None:
         body["user_id"] = user_id
-    if conversation_id is not None:
-        body["conversation_id"] = conversation_id
     if group is not None:
         body["group"] = group
     if properties is not None:
@@ -122,7 +119,6 @@ def build_search_body(
     query: str,
     topics: list[TopicSelector] | None,
     user_id: str | None,
-    conversation_id: str | None,
     group: str | None,
     retrieval_config: RetrievalConfig | None,
     properties: dict[str, str] | None = None,
@@ -138,8 +134,6 @@ def build_search_body(
         body["topics"] = serialized_topics
     if user_id is not None:
         body["user_id"] = user_id
-    if conversation_id is not None:
-        body["conversation_id"] = conversation_id
     if group is not None:
         body["group"] = group
     if properties is not None:

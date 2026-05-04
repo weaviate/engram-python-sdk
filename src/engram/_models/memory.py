@@ -121,7 +121,6 @@ class Memory:
     created_at: str
     updated_at: str
     user_id: str | None = None
-    conversation_id: str | None = None
     tags: list[str] | None = None
     score: float | None = None
     properties: dict[str, str] | None = None
