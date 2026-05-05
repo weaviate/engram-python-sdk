@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import TypeAlias
 from uuid import UUID
 
 from .._http import AsyncHttpTransport, HttpTransport
@@ -23,8 +22,6 @@ from .._serialization import (
 
 _MEMORIES_PATH = "/v1/memories"
 _MEMORIES_SEARCH_PATH = "/v1/memories/search"
-
-_Topics: TypeAlias = list[TopicSelector] | None
 
 
 def _memory_path(memory_id: str | UUID) -> str:
@@ -85,7 +82,7 @@ class Memories:
         self,
         *,
         query: str,
-        topics: _Topics = None,
+        topics: list[TopicSelector] | None = None,
         user_id: str | None = None,
         group: str | None = None,
         retrieval_config: RetrievalConfig | None = None,
@@ -157,7 +154,7 @@ class AsyncMemories:
         self,
         *,
         query: str,
-        topics: _Topics = None,
+        topics: list[TopicSelector] | None = None,
         user_id: str | None = None,
         group: str | None = None,
         retrieval_config: RetrievalConfig | None = None,

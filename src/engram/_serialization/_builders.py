@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TypeAlias
 
 from .._models import (
     AddInput,
@@ -67,18 +67,21 @@ def _serialize_conversation_content(content: ConversationInput) -> dict[str, Any
     return {"conversation": conversation}
 
 
-def _serialize_topic(topic: TopicSelector) -> str | dict[str, Any]:
+_SerializedTopic: TypeAlias = str | dict[str, str | dict[str, str | None]]
+
+
+def _serialize_topic(topic: TopicSelector) -> _SerializedTopic:
     if isinstance(topic, str):
         return topic
     if isinstance(topic, Topic):
-        out: dict[str, Any] = {"name": topic.name}
+        out: dict[str, str | dict[str, str | None]] = {"name": topic.name}
         if topic.properties is not None:
             out["properties"] = dict(topic.properties)
         return out
     raise TypeError(f"Unsupported topic type: {type(topic)}")  # pragma: no cover
 
 
-def _serialize_topics(topics: list[TopicSelector] | None) -> list[str | dict[str, Any]] | None:
+def _serialize_topics(topics: list[TopicSelector] | None) -> list[_SerializedTopic] | None:
     if topics is None:
         return None
     return [_serialize_topic(t) for t in topics]
