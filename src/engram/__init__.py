@@ -14,6 +14,7 @@ from ._models import (
     ToolCallCustomInput,
     ToolCallFuncInput,
     ToolCallInput,
+    Topic,
 )
 from .async_client import AsyncEngramClient
 from .client import EngramClient
@@ -50,6 +51,7 @@ __all__ = [
     "ToolCallCustomInput",
     "ToolCallFuncInput",
     "ToolCallInput",
+    "Topic",
     "ValidationError",
     "__version__",
 ]

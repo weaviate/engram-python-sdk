@@ -97,6 +97,21 @@ class RetrievalConfig:
 
 
 @dataclass(slots=True)
+class Topic:
+    """A topic with an optional per-topic property filter.
+
+    Use ``None`` as a property value to clear an inherited global filter
+    for this topic only.
+    """
+
+    name: str
+    properties: dict[str, str | None] | None = None
+
+
+TopicSelector: TypeAlias = str | Topic
+
+
+@dataclass(slots=True)
 class Memory:
     id: str
     project_id: str
@@ -106,9 +121,9 @@ class Memory:
     created_at: str
     updated_at: str
     user_id: str | None = None
-    conversation_id: str | None = None
     tags: list[str] | None = None
     score: float | None = None
+    properties: dict[str, str] | None = None
 
 
 class SearchResults(Sequence[Memory]):

@@ -23,6 +23,7 @@ def test_public_imports() -> None:
         ToolCallCustomInput,
         ToolCallFuncInput,
         ToolCallInput,
+        Topic,
         ValidationError,
     )
 
@@ -48,6 +49,7 @@ def test_public_imports() -> None:
     assert isinstance(ToolCallCustomInput, type)
     assert isinstance(ToolCallFuncInput, type)
     assert isinstance(ToolCallInput, type)
+    assert isinstance(Topic, type)
 
     expected_exports = {
         "APIError",
@@ -72,6 +74,7 @@ def test_public_imports() -> None:
         "ToolCallCustomInput",
         "ToolCallFuncInput",
         "ToolCallInput",
+        "Topic",
         "ValidationError",
         "__version__",
     }

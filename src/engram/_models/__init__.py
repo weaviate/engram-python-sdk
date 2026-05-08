@@ -11,6 +11,8 @@ from .memory import (
     ToolCallCustomInput,
     ToolCallFuncInput,
     ToolCallInput,
+    Topic,
+    TopicSelector,
 )
 from .run import CommittedOperation, CommittedOperations, Run, RunStatus
 
@@ -31,4 +33,6 @@ __all__ = [
     "ToolCallCustomInput",
     "ToolCallFuncInput",
     "ToolCallInput",
+    "Topic",
+    "TopicSelector",
 ]

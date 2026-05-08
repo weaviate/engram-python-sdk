@@ -14,6 +14,7 @@ from engram._models import (
     StringInput,
     ToolCallFuncInput,
     ToolCallInput,
+    Topic,
 )
 from engram.async_client import DEFAULT_BASE_URL, AsyncEngramClient
 from engram.errors import APIError, AuthenticationError, ValidationError
@@ -130,7 +131,7 @@ async def test_add_conversation() -> None:
     result = await client.memories.add(
         [{"role": "user", "content": "hi"}],
         user_id="u1",
-        conversation_id="c1",
+        properties={"conversation_id": "c1"},
     )
     assert result.run_id == "r3"
 
@@ -233,7 +234,7 @@ async def test_add_conversation_content() -> None:
     result = await client.memories.add(
         ConversationInput(messages=[MessageInput(role="user", content="hi")]),
         user_id="u1",
-        conversation_id="c1",
+        properties={"conversation_id": "c1"},
     )
     assert result.run_id == "r5"
 
@@ -262,7 +263,7 @@ async def test_add_conversation_content_sends_correct_envelope() -> None:
             ],
             metadata={"session_id": "s1"},
         ),
-        conversation_id="c1",
+        properties={"conversation_id": "c1"},
     )
     body = json.loads(captured[0].content)
     conv = body["input"]["conversation"]
@@ -270,7 +271,7 @@ async def test_add_conversation_content_sends_correct_envelope() -> None:
     assert conv["messages"][1]["tool_calls"] == [
         {"id": "tc1", "type": "function", "function": {"name": "search", "arguments": "{}"}}
     ]
-    assert body["conversation_id"] == "c1"
+    assert body["properties"] == {"conversation_id": "c1"}
 
 
 # ── memories.get ────────────────────────────────────────────────────────
@@ -369,6 +370,45 @@ async def test_search_sends_correct_body() -> None:
     assert body["topics"] == ["a"]
     assert body["retrieval_config"]["retrieval_type"] == "vector"
     assert body["retrieval_config"]["limit"] == 5
+
+
+# ── properties / list ───────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_add_sends_properties() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json={"run_id": "r1", "status": "pending"})
+
+    client = _make_client_with_handler(handler)
+    await client.memories.add(
+        "hello",
+        properties={"region": "eu"},
+    )
+    body = json.loads(captured[0].content)
+    assert body["properties"] == {"region": "eu"}
+
+
+@pytest.mark.asyncio
+async def test_search_sends_topic_filters() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json={"memories": [], "total": 0})
+
+    client = _make_client_with_handler(handler)
+    await client.memories.search(
+        query="q",
+        topics=[Topic(name="t1", properties={"region": "eu"})],
+        properties={"tier": "pro"},
+    )
+    body = json.loads(captured[0].content)
+    assert body["topics"] == [{"name": "t1", "properties": {"region": "eu"}}]
+    assert body["properties"] == {"tier": "pro"}
 
 
 # ── runs.get ────────────────────────────────────────────────────────────
