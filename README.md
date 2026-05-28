@@ -1,9 +1,17 @@
+<img src="https://raw.githubusercontent.com/weaviate/engram-python-sdk/main/docs/assets/weaviate-logo.png" alt="Weaviate" width="140" align="right" />
+
 # weaviate-engram
 
-> [!WARNING]
-> **Engram is currently in preview.** While in preview (pre-1.0), the API is subject to breaking changes without notice. Use in production at your own risk.
+[![PyPI version](https://img.shields.io/pypi/v/weaviate-engram.svg)](https://pypi.org/project/weaviate-engram/)
+[![Python versions](https://img.shields.io/pypi/pyversions/weaviate-engram.svg)](https://pypi.org/project/weaviate-engram/)
+[![License](https://img.shields.io/pypi/l/weaviate-engram.svg)](https://github.com/weaviate/engram-python-sdk/blob/main/LICENSE)
+[![CI](https://github.com/weaviate/engram-python-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/weaviate/engram-python-sdk/actions/workflows/ci.yml)
 
-Engram is a fully managed memory service by Weaviate. It lets you add persistent, personalized memory to AI assistants and agents — no infrastructure to set up or manage. When you add a memory, Engram processes it asynchronously through a background pipeline that extracts, deduplicates, and reconciles facts. Memories are scoped at three levels — project, user, and conversation — which can be mixed and matched freely. Each scope is backed by Weaviate's multi-tenant architecture, ensuring strong isolation between tenants.
+The official Python SDK for **Engram**, the fully managed memory service by Weaviate.
+
+Engram lets you add persistent, personalized memory to AI assistants and agents, with no infrastructure to set up or manage. When you add a memory, Engram processes it asynchronously through a background pipeline that extracts, deduplicates, and reconciles facts. Memories are scoped at three levels (project, user, and conversation), and these scopes can be mixed and matched freely. Each scope is backed by Weaviate's multi-tenant architecture, ensuring strong isolation between tenants.
+
+[Learn more about Engram →](https://weaviate.io/product/engram)
 
 ## Requirements
 
@@ -19,44 +27,68 @@ pip install weaviate-engram
 uv add weaviate-engram
 ```
 
-## Quick Start
+## Get an API key
 
-Create a project and get an API key at [console.weaviate.cloud/engram](https://console.weaviate.cloud/engram).
+Engram runs on [Weaviate Cloud](https://console.weaviate.cloud). To get started:
+
+1. **Sign up** (or log in) at [console.weaviate.cloud](https://console.weaviate.cloud).
+2. **Open Engram** and create a project at [console.weaviate.cloud/engram](https://console.weaviate.cloud/engram).
+3. **Generate an API key** from the project's **API Keys** page. Keys are shown once, so copy yours somewhere safe.
+
+## Quick start
+
+**1. Initialize the client**
 
 ```python
 from engram import EngramClient
 
-client = EngramClient(api_key="your-api-key")
+client = EngramClient(api_key="YOUR_API_KEY")
 ```
 
-**Add a memory from a string:**
+**2. Add a memory from a string**
 
 ```python
-run = client.memories.add("Alice prefers async Python and avoids Java.", user_id="user_123")
+# add() returns immediately. Memory processing happens asynchronously
+# in the background via Engram's pipeline.
+run = client.memories.add(
+    "User prefers concise responses and dark mode",
+    user_id="alice@example.com",
+)
+print(run.run_id)  # e.g. "run_abc123"
 ```
 
-**Add a memory from a conversation:**
+**3. Add a memory from a conversation**
+
+Conversations use the OpenAI Chat Completions message format. Pass a `conversation_id` via `properties` to scope memories to a specific session:
 
 ```python
 run = client.memories.add(
     [
-        {"role": "user", "content": "What's the best way to handle retries?"},
-        {"role": "assistant", "content": "Exponential backoff with jitter is the standard approach."},
-        {"role": "user", "content": "Got it — I'll use that in my HTTP client."},
+        {"role": "user", "content": "I just moved to Berlin and I am looking for a good coffee shop."},
+        {"role": "assistant", "content": "Welcome to Berlin! Here are some popular coffee shops in the city..."},
+        {"role": "user", "content": "I prefer specialty coffee, not chains."},
     ],
-    user_id="user_123",
+    user_id="alice@example.com",
+    properties={"conversation_id": "session-abc123"},
 )
+
+print(run.run_id)  # e.g. "run_abc123"
 ```
 
-**Search memories:**
+**4. Search memories**
 
 ```python
-results = client.memories.search(query="What does Alice think about Python?", user_id="user_123")
+results = client.memories.search(
+    query="What does the user prefer?",
+    user_id="alice@example.com",
+)
 for memory in results:
     print(memory.content)
 ```
 
-**Wait for a run to complete** (memory processing is asynchronous):
+## Waiting for a run to complete
+
+Since `add()` is asynchronous, use `runs.wait()` when you need to know the result of the pipeline run, for example in tests or batch ingestion scripts:
 
 ```python
 status = client.runs.wait(run.run_id, timeout=60.0)
@@ -64,18 +96,44 @@ print(status.status)  # "completed" or "failed"
 print(f"+{len(status.memories_created)} ~{len(status.memories_updated)} -{len(status.memories_deleted)}")
 ```
 
-## Async Client
+## Async client
 
-An async client is also available:
+An async client with the same surface is available:
 
 ```python
 from engram import AsyncEngramClient
 
-client = AsyncEngramClient(api_key="your-api-key")
+client = AsyncEngramClient(api_key="YOUR_API_KEY")
 
-run = await client.memories.add("Alice prefers async Python and avoids Java.", user_id="user_123")
-results = await client.memories.search(query="What does Alice think about Python?", user_id="user_123")
+run = await client.memories.add(
+    "User prefers concise responses and dark mode",
+    user_id="alice@example.com",
+)
+results = await client.memories.search(
+    query="What does the user prefer?",
+    user_id="alice@example.com",
+)
 ```
+
+## Error handling
+
+All SDK exceptions inherit from `EngramError`:
+
+```python
+from engram import (
+    APIError,             # raised on any non-2xx response
+    AuthenticationError,  # 401, invalid or missing API key
+    ValidationError,      # invalid client configuration or request input
+    ConnectionError,      # network failure reaching the Engram API
+    EngramTimeoutError,   # runs.wait() did not reach a terminal status in time
+)
+```
+
+## Learn more
+
+- **Product page:** [weaviate.io/product/engram](https://weaviate.io/product/engram)
+- **Weaviate Cloud console:** [console.weaviate.cloud/engram](https://console.weaviate.cloud/engram)
+- **Sign up:** [console.weaviate.cloud](https://console.weaviate.cloud)
 
 ## Contributing
 
