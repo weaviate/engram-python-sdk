@@ -1,7 +1,10 @@
 from ._models import (
+    BM25Retrieval,
     CommittedOperation,
     CommittedOperations,
     ConversationInput,
+    FetchRetrieval,
+    HybridRetrieval,
     Memory,
     MessageInput,
     PreExtractedInput,
@@ -15,6 +18,7 @@ from ._models import (
     ToolCallFuncInput,
     ToolCallInput,
     Topic,
+    VectorRetrieval,
 )
 from .async_client import AsyncEngramClient
 from .client import EngramClient
@@ -32,6 +36,7 @@ __all__ = [
     "APIError",
     "AsyncEngramClient",
     "AuthenticationError",
+    "BM25Retrieval",
     "CommittedOperation",
     "CommittedOperations",
     "ConnectionError",
@@ -39,6 +44,8 @@ __all__ = [
     "EngramClient",
     "EngramError",
     "EngramTimeoutError",
+    "FetchRetrieval",
+    "HybridRetrieval",
     "Memory",
     "MessageInput",
     "PreExtractedInput",
@@ -53,5 +60,6 @@ __all__ = [
     "ToolCallInput",
     "Topic",
     "ValidationError",
+    "VectorRetrieval",
     "__version__",
 ]

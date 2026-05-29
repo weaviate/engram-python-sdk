@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Literal, TypeAlias
 
 
@@ -91,9 +91,30 @@ AddInput: TypeAlias = (
 
 
 @dataclass(slots=True)
-class RetrievalConfig:
-    retrieval_type: Literal["vector", "bm25", "hybrid", "fetch"]
+class VectorRetrieval:
     limit: int | None = None
+    retrieval_type: Literal["vector"] = field(default="vector", init=False)
+
+
+@dataclass(slots=True)
+class BM25Retrieval:
+    limit: int | None = None
+    retrieval_type: Literal["bm25"] = field(default="bm25", init=False)
+
+
+@dataclass(slots=True)
+class HybridRetrieval:
+    limit: int | None = None
+    retrieval_type: Literal["hybrid"] = field(default="hybrid", init=False)
+
+
+@dataclass(slots=True)
+class FetchRetrieval:
+    limit: int | None = None
+    retrieval_type: Literal["fetch"] = field(default="fetch", init=False)
+
+
+RetrievalConfig: TypeAlias = VectorRetrieval | BM25Retrieval | HybridRetrieval | FetchRetrieval
 
 
 @dataclass(slots=True)

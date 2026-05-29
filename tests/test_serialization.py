@@ -3,12 +3,12 @@ from engram._models import (
     MessageInput,
     PreExtractedInput,
     PreExtractedItem,
-    RetrievalConfig,
     StringInput,
     ToolCallCustomInput,
     ToolCallFuncInput,
     ToolCallInput,
     Topic,
+    VectorRetrieval,
 )
 from engram._serialization import (
     build_add_body,
@@ -255,7 +255,7 @@ def test_build_search_body_full() -> None:
         topics=["a", "b"],
         user_id="u1",
         group="g1",
-        retrieval_config=RetrievalConfig(retrieval_type="vector", limit=5),
+        retrieval_config=VectorRetrieval(limit=5),
     )
     assert body["topics"] == ["a", "b"]
     assert body["user_id"] == "u1"

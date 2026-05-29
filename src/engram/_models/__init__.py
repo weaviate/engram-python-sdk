@@ -1,6 +1,9 @@
 from .memory import (
     AddInput,
+    BM25Retrieval,
     ConversationInput,
+    FetchRetrieval,
+    HybridRetrieval,
     Memory,
     MessageInput,
     PreExtractedInput,
@@ -13,14 +16,18 @@ from .memory import (
     ToolCallInput,
     Topic,
     TopicSelector,
+    VectorRetrieval,
 )
 from .run import CommittedOperation, CommittedOperations, Run, RunStatus
 
 __all__ = [
     "AddInput",
+    "BM25Retrieval",
     "CommittedOperation",
     "CommittedOperations",
     "ConversationInput",
+    "FetchRetrieval",
+    "HybridRetrieval",
     "Memory",
     "MessageInput",
     "PreExtractedInput",
@@ -35,4 +42,5 @@ __all__ = [
     "ToolCallInput",
     "Topic",
     "TopicSelector",
+    "VectorRetrieval",
 ]

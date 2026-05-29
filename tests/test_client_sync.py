@@ -10,11 +10,11 @@ from engram._models import (
     MessageInput,
     PreExtractedInput,
     PreExtractedItem,
-    RetrievalConfig,
     StringInput,
     ToolCallFuncInput,
     ToolCallInput,
     Topic,
+    VectorRetrieval,
 )
 from engram.client import DEFAULT_BASE_URL, EngramClient
 from engram.errors import APIError, AuthenticationError, ValidationError
@@ -367,7 +367,7 @@ def test_search_sends_correct_body() -> None:
     client.memories.search(
         query="find this",
         topics=["a"],
-        retrieval_config=RetrievalConfig(retrieval_type="vector", limit=5),
+        retrieval_config=VectorRetrieval(limit=5),
     )
     body = json.loads(captured[0].content)
     assert body["query"] == "find this"
