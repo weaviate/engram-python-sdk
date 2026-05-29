@@ -118,8 +118,6 @@ NamedRetrievalType: TypeAlias = Literal["vector", "bm25", "hybrid", "fetch"]
 
 RetrievalConfigModel: TypeAlias = VectorRetrieval | BM25Retrieval | HybridRetrieval | FetchRetrieval
 
-RetrievalConfig: TypeAlias = RetrievalConfigModel | NamedRetrievalType
-
 
 @dataclass(slots=True)
 class Topic:

@@ -8,17 +8,14 @@ from .._models import (
     ConversationInput,
     FetchRetrieval,
     HybridRetrieval,
+    NamedRetrievalType,
     PreExtractedInput,
-    RetrievalConfig,
+    RetrievalConfigModel,
     StringInput,
     ToolCallInput,
     Topic,
     TopicSelector,
     VectorRetrieval,
-)
-from .._models.memory import (
-    NamedRetrievalType,
-    RetrievalConfigModel,
 )
 
 
@@ -131,7 +128,7 @@ def build_search_body(
     topics: list[TopicSelector] | None,
     user_id: str | None,
     group: str | None,
-    retrieval_config: RetrievalConfig | None,
+    retrieval_config: RetrievalConfigModel | NamedRetrievalType | None,
     properties: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     body: dict[str, Any] = {"query": query}
