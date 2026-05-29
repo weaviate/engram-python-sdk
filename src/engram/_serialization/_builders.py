@@ -4,13 +4,18 @@ from typing import Any, TypeAlias
 
 from .._models import (
     AddInput,
+    BM25Retrieval,
     ConversationInput,
+    FetchRetrieval,
+    HybridRetrieval,
+    NamedRetrievalType,
     PreExtractedInput,
-    RetrievalConfig,
+    RetrievalConfigModel,
     StringInput,
     ToolCallInput,
     Topic,
     TopicSelector,
+    VectorRetrieval,
 )
 
 
@@ -123,11 +128,16 @@ def build_search_body(
     topics: list[TopicSelector] | None,
     user_id: str | None,
     group: str | None,
-    retrieval_config: RetrievalConfig | None,
+    retrieval_config: RetrievalConfigModel | NamedRetrievalType | None,
     properties: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     body: dict[str, Any] = {"query": query}
     if retrieval_config is not None:
+        if isinstance(retrieval_config, str):
+            name = retrieval_config
+            retrieval_config = _retrieval_type_to_config.get(name)
+            if retrieval_config is None:
+                raise ValueError(f"Unrecognised retrieval type: {name}")
         body["retrieval_config"] = {
             "retrieval_type": retrieval_config.retrieval_type,
             "limit": retrieval_config.limit,
@@ -142,3 +152,11 @@ def build_search_body(
     if properties is not None:
         body["properties"] = dict(properties)
     return body
+
+
+_retrieval_type_to_config: dict[NamedRetrievalType, RetrievalConfigModel] = {
+    "vector": VectorRetrieval(),
+    "bm25": BM25Retrieval(),
+    "hybrid": HybridRetrieval(),
+    "fetch": FetchRetrieval(),
+}

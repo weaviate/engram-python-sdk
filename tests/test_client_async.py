@@ -10,11 +10,11 @@ from engram._models import (
     MessageInput,
     PreExtractedInput,
     PreExtractedItem,
-    RetrievalConfig,
     StringInput,
     ToolCallFuncInput,
     ToolCallInput,
     Topic,
+    VectorRetrieval,
 )
 from engram.async_client import DEFAULT_BASE_URL, AsyncEngramClient
 from engram.errors import APIError, AuthenticationError, ValidationError
@@ -363,13 +363,30 @@ async def test_search_sends_correct_body() -> None:
     await client.memories.search(
         query="find this",
         topics=["a"],
-        retrieval_config=RetrievalConfig(retrieval_type="vector", limit=5),
+        retrieval_config=VectorRetrieval(limit=5),
     )
     body = json.loads(captured[0].content)
     assert body["query"] == "find this"
     assert body["topics"] == ["a"]
     assert body["retrieval_config"]["retrieval_type"] == "vector"
     assert body["retrieval_config"]["limit"] == 5
+
+
+@pytest.mark.asyncio
+async def test_search_string_retrieval_config() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json={"memories": [], "total": 0})
+
+    client = _make_client_with_handler(handler)
+    for retrieval_type in ("vector", "bm25", "hybrid", "fetch"):
+        captured.clear()
+        await client.memories.search(query="test", retrieval_config=retrieval_type)
+        body = json.loads(captured[0].content)
+        assert body["retrieval_config"]["retrieval_type"] == retrieval_type
+        assert body["retrieval_config"]["limit"] is None
 
 
 # ── properties / list ───────────────────────────────────────────────────

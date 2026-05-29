@@ -4,6 +4,7 @@ def test_public_imports() -> None:
         APIError,
         AsyncEngramClient,
         AuthenticationError,
+        BM25Retrieval,
         CommittedOperation,
         CommittedOperations,
         ConnectionError,
@@ -11,11 +12,14 @@ def test_public_imports() -> None:
         EngramClient,
         EngramError,
         EngramTimeoutError,
+        FetchRetrieval,
+        HybridRetrieval,
         Memory,
         MessageInput,
+        NamedRetrievalType,
         PreExtractedInput,
         PreExtractedItem,
-        RetrievalConfig,
+        RetrievalConfigModel,
         Run,
         RunStatus,
         SearchResults,
@@ -25,6 +29,7 @@ def test_public_imports() -> None:
         ToolCallInput,
         Topic,
         ValidationError,
+        VectorRetrieval,
     )
 
     assert isinstance(EngramClient, type)
@@ -40,7 +45,10 @@ def test_public_imports() -> None:
     assert isinstance(SearchResults, type)
     assert isinstance(PreExtractedInput, type)
     assert isinstance(PreExtractedItem, type)
-    assert isinstance(RetrievalConfig, type)
+    assert isinstance(VectorRetrieval, type)
+    assert isinstance(BM25Retrieval, type)
+    assert isinstance(HybridRetrieval, type)
+    assert isinstance(FetchRetrieval, type)
     assert isinstance(CommittedOperation, type)
     assert isinstance(CommittedOperations, type)
     assert isinstance(ConversationInput, type)
@@ -55,6 +63,7 @@ def test_public_imports() -> None:
         "APIError",
         "AsyncEngramClient",
         "AuthenticationError",
+        "BM25Retrieval",
         "CommittedOperation",
         "CommittedOperations",
         "ConnectionError",
@@ -62,11 +71,14 @@ def test_public_imports() -> None:
         "EngramClient",
         "EngramError",
         "EngramTimeoutError",
+        "FetchRetrieval",
+        "HybridRetrieval",
         "Memory",
         "MessageInput",
+        "NamedRetrievalType",
         "PreExtractedInput",
         "PreExtractedItem",
-        "RetrievalConfig",
+        "RetrievalConfigModel",
         "Run",
         "RunStatus",
         "SearchResults",
@@ -76,6 +88,7 @@ def test_public_imports() -> None:
         "ToolCallInput",
         "Topic",
         "ValidationError",
+        "VectorRetrieval",
         "__version__",
     }
     assert set(engram.__all__) == expected_exports

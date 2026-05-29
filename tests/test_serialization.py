@@ -3,12 +3,12 @@ from engram._models import (
     MessageInput,
     PreExtractedInput,
     PreExtractedItem,
-    RetrievalConfig,
     StringInput,
     ToolCallCustomInput,
     ToolCallFuncInput,
     ToolCallInput,
     Topic,
+    VectorRetrieval,
 )
 from engram._serialization import (
     build_add_body,
@@ -255,12 +255,25 @@ def test_build_search_body_full() -> None:
         topics=["a", "b"],
         user_id="u1",
         group="g1",
-        retrieval_config=RetrievalConfig(retrieval_type="vector", limit=5),
+        retrieval_config=VectorRetrieval(limit=5),
     )
     assert body["topics"] == ["a", "b"]
     assert body["user_id"] == "u1"
     assert body["retrieval_config"]["retrieval_type"] == "vector"
     assert body["retrieval_config"]["limit"] == 5
+
+
+def test_build_search_body_string_retrieval_config() -> None:
+    for retrieval_type in ("vector", "bm25", "hybrid", "fetch"):
+        body = build_search_body(
+            query="test",
+            topics=None,
+            user_id=None,
+            group=None,
+            retrieval_config=retrieval_type,
+        )
+        assert body["retrieval_config"]["retrieval_type"] == retrieval_type
+        assert body["retrieval_config"]["limit"] is None
 
 
 # ── properties on add ───────────────────────────────────────────────────

@@ -10,11 +10,11 @@ from engram._models import (
     MessageInput,
     PreExtractedInput,
     PreExtractedItem,
-    RetrievalConfig,
     StringInput,
     ToolCallFuncInput,
     ToolCallInput,
     Topic,
+    VectorRetrieval,
 )
 from engram.client import DEFAULT_BASE_URL, EngramClient
 from engram.errors import APIError, AuthenticationError, ValidationError
@@ -367,13 +367,29 @@ def test_search_sends_correct_body() -> None:
     client.memories.search(
         query="find this",
         topics=["a"],
-        retrieval_config=RetrievalConfig(retrieval_type="vector", limit=5),
+        retrieval_config=VectorRetrieval(limit=5),
     )
     body = json.loads(captured[0].content)
     assert body["query"] == "find this"
     assert body["topics"] == ["a"]
     assert body["retrieval_config"]["retrieval_type"] == "vector"
     assert body["retrieval_config"]["limit"] == 5
+
+
+def test_search_string_retrieval_config() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json={"memories": [], "total": 0})
+
+    client = _make_client_with_handler(handler)
+    for retrieval_type in ("vector", "bm25", "hybrid", "fetch"):
+        captured.clear()
+        client.memories.search(query="test", retrieval_config=retrieval_type)
+        body = json.loads(captured[0].content)
+        assert body["retrieval_config"]["retrieval_type"] == retrieval_type
+        assert body["retrieval_config"]["limit"] is None
 
 
 def test_search_no_retrieval_config_by_default() -> None:

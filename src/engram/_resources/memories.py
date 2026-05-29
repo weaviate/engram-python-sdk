@@ -6,7 +6,8 @@ from .._http import AsyncHttpTransport, HttpTransport
 from .._models import (
     AddInput,
     Memory,
-    RetrievalConfig,
+    NamedRetrievalType,
+    RetrievalConfigModel,
     Run,
     SearchResults,
     TopicSelector,
@@ -85,7 +86,7 @@ class Memories:
         topics: list[TopicSelector] | None = None,
         user_id: str | None = None,
         group: str | None = None,
-        retrieval_config: RetrievalConfig | None = None,
+        retrieval_config: RetrievalConfigModel | NamedRetrievalType | None = None,
         properties: dict[str, str] | None = None,
     ) -> SearchResults:
         body = build_search_body(
@@ -157,7 +158,7 @@ class AsyncMemories:
         topics: list[TopicSelector] | None = None,
         user_id: str | None = None,
         group: str | None = None,
-        retrieval_config: RetrievalConfig | None = None,
+        retrieval_config: RetrievalConfigModel | NamedRetrievalType | None = None,
         properties: dict[str, str] | None = None,
     ) -> SearchResults:
         body = build_search_body(
