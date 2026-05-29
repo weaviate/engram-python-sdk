@@ -9,7 +9,7 @@
 
 The official Python SDK for **Engram**, the fully managed memory service by Weaviate.
 
-Engram lets you add persistent, personalized memory to AI assistants and agents, with no infrastructure to set up or manage. When you add a memory, Engram processes it asynchronously through a background pipeline that extracts, deduplicates, and reconciles facts. Memories are scoped at three levels (project, user, and conversation), and these scopes can be mixed and matched freely. Each scope is backed by Weaviate's multi-tenant architecture, ensuring strong isolation between tenants.
+Engram lets you add persistent, personalized memory to AI assistants and agents, with no infrastructure to set up or manage. When you add a memory, Engram processes it asynchronously through a background pipeline that extracts, deduplicates, and reconciles facts. Memories are scoped by project and user, along with any custom scope properties you define, and these scopes can be mixed and matched freely. Each scope is backed by Weaviate's multi-tenant architecture, ensuring strong isolation between tenants.
 
 [Learn more about Engram →](https://weaviate.io/product/engram)
 
@@ -59,7 +59,7 @@ print(run.run_id)  # e.g. "run_abc123"
 
 **3. Add a memory from a conversation**
 
-Conversations use the OpenAI Chat Completions message format. Pass a `conversation_id` via `properties` to scope memories to a specific session:
+Conversations use the OpenAI Chat Completions message format. Separately, you can pass scope `properties` to control where a memory lives — here a `conversation_id` scopes it to a specific session. Properties work with any input type, not just conversations:
 
 ```python
 run = client.memories.add(
@@ -84,16 +84,6 @@ results = client.memories.search(
 )
 for memory in results:
     print(memory.content)
-```
-
-## Waiting for a run to complete
-
-Since `add()` is asynchronous, use `runs.wait()` when you need to know the result of the pipeline run, for example in tests or batch ingestion scripts:
-
-```python
-status = client.runs.wait(run.run_id, timeout=60.0)
-print(status.status)  # "completed" or "failed"
-print(f"+{len(status.memories_created)} ~{len(status.memories_updated)} -{len(status.memories_deleted)}")
 ```
 
 ## Async client
@@ -127,6 +117,18 @@ from engram import (
     ConnectionError,      # network failure reaching the Engram API
     EngramTimeoutError,   # runs.wait() did not reach a terminal status in time
 )
+```
+
+## Waiting for a run to complete
+
+Each run is processed asynchronously. Under normal conditions you should **not** wait on runs — treat `add()` as fire-and-forget to keep latency low and let the pipeline reconcile memories in the background. Blocking on every run defeats the purpose of the async pipeline and will slow your application down, especially when ingesting at volume.
+
+`runs.wait()` exists for the cases where you genuinely need the outcome of a specific run before proceeding — primarily debugging and tests:
+
+```python
+status = client.runs.wait(run.run_id, timeout=60.0)
+print(status.status)  # "completed" or "failed"
+print(f"+{len(status.memories_created)} ~{len(status.memories_updated)} -{len(status.memories_deleted)}")
 ```
 
 ## Learn more
