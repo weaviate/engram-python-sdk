@@ -114,7 +114,11 @@ class FetchRetrieval:
     retrieval_type: Literal["fetch"] = field(default="fetch", init=False)
 
 
-RetrievalConfig: TypeAlias = VectorRetrieval | BM25Retrieval | HybridRetrieval | FetchRetrieval
+NamedRetrievalType: TypeAlias = Literal["vector", "bm25", "hybrid", "fetch"]
+
+RetrievalConfigModel: TypeAlias = VectorRetrieval | BM25Retrieval | HybridRetrieval | FetchRetrieval
+
+RetrievalConfig: TypeAlias = RetrievalConfigModel | NamedRetrievalType
 
 
 @dataclass(slots=True)
