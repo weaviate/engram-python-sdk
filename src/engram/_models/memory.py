@@ -27,6 +27,8 @@ class StringInput:
     """String input to extract memories from."""
 
     content: str | list[str]
+    created_at: str | None = None
+    updated_at: str | None = None
 
 
 @dataclass(slots=True)

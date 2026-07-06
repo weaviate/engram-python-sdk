@@ -33,10 +33,7 @@ def _serialize_input(input_data: AddInput) -> dict[str, Any]:
     if isinstance(input_data, str):
         return {"string": {"content": [input_data]}}
     if isinstance(input_data, StringInput):
-        if isinstance(input_data.content, list):
-            return {"string": {"content": input_data.content}}
-        else:
-            return {"string": {"content": [input_data.content]}}
+        return _serialize_string_input(input_data)
     if isinstance(input_data, PreExtractedInput):
         items = [{"content": item.content, "topic": item.topic} for item in input_data.items]
         return {"pre_extracted": {"items": items}}
@@ -47,6 +44,16 @@ def _serialize_input(input_data: AddInput) -> dict[str, Any]:
     if isinstance(input_data, ConversationInput):
         return _serialize_conversation_content(input_data)
     raise TypeError(f"Unsupported input type: {type(input_data)}")  # pragma: no cover
+
+
+def _serialize_string_input(input_data: StringInput) -> dict[str, Any]:
+    content = input_data.content if isinstance(input_data.content, list) else [input_data.content]
+    body: dict[str, Any] = {"content": content}
+    if input_data.created_at is not None:
+        body["created_at"] = input_data.created_at
+    if input_data.updated_at is not None:
+        body["updated_at"] = input_data.updated_at
+    return {"string": body}
 
 
 def _serialize_conversation_content(content: ConversationInput) -> dict[str, Any]:

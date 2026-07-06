@@ -94,6 +94,27 @@ def test_build_add_body_string_content_with_options() -> None:
     }
 
 
+def test_build_add_body_string_content_with_timestamps() -> None:
+    body = build_add_body(
+        StringInput(
+            content="hello world",
+            created_at="2024-01-01T00:00:00Z",
+            updated_at="2024-01-02T00:00:00Z",
+        ),
+        user_id=None,
+        group=None,
+    )
+    assert body == {
+        "input": {
+            "string": {
+                "content": ["hello world"],
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-02T00:00:00Z",
+            },
+        },
+    }
+
+
 def test_build_add_body_conversation_content() -> None:
     messages = [
         MessageInput(role="user", content="hi"),
