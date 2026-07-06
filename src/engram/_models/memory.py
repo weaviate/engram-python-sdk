@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Literal, TypeAlias
 
 
@@ -27,8 +28,8 @@ class StringInput:
     """String input to extract memories from."""
 
     content: str | list[str]
-    created_at: str | None = None
-    updated_at: str | None = None
+    created_at: str | datetime | None = None
+    updated_at: str | datetime | None = None
 
 
 @dataclass(slots=True)
@@ -70,7 +71,7 @@ class MessageInput:
 
     role: Literal["user", "assistant", "system", "tool", "developer"]
     content: str = ""
-    created_at: str | None = None
+    created_at: str | datetime | None = None
     tool_call_id: str | None = None
     name: str | None = None
     tool_calls: list[ToolCallInput] | None = None
@@ -82,8 +83,8 @@ class ConversationInput:
 
     messages: list[MessageInput]
     metadata: dict[str, Any] | None = None
-    created_at: str | None = None
-    updated_at: str | None = None
+    created_at: str | datetime | None = None
+    updated_at: str | datetime | None = None
 
 
 # Type alias for the input_data argument to memories.add()
