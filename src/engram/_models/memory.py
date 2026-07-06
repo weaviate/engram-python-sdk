@@ -79,7 +79,7 @@ class MessageInput:
 
 @dataclass(slots=True)
 class ConversationInput:
-    """Conversation input that bypasses the extraction pipeline."""
+    """Conversation input to extract memories from."""
 
     messages: list[MessageInput]
     metadata: dict[str, Any] | None = None
