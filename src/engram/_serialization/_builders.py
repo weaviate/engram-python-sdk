@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Any, TypeAlias
 
 from .._models import (
@@ -33,10 +34,7 @@ def _serialize_input(input_data: AddInput) -> dict[str, Any]:
     if isinstance(input_data, str):
         return {"string": {"content": [input_data]}}
     if isinstance(input_data, StringInput):
-        if isinstance(input_data.content, list):
-            return {"string": {"content": input_data.content}}
-        else:
-            return {"string": {"content": [input_data.content]}}
+        return _serialize_string_input(input_data)
     if isinstance(input_data, PreExtractedInput):
         items = [{"content": item.content, "topic": item.topic} for item in input_data.items]
         return {"pre_extracted": {"items": items}}
@@ -49,12 +47,31 @@ def _serialize_input(input_data: AddInput) -> dict[str, Any]:
     raise TypeError(f"Unsupported input type: {type(input_data)}")  # pragma: no cover
 
 
+def _serialize_timestamp(value: str | datetime) -> str:
+    """Format a timestamp as RFC 3339 (e.g. "2024-01-01T00:00:00Z")."""
+    if isinstance(value, str):
+        return value
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    return value.isoformat().replace("+00:00", "Z")
+
+
+def _serialize_string_input(input_data: StringInput) -> dict[str, Any]:
+    content = input_data.content if isinstance(input_data.content, list) else [input_data.content]
+    body: dict[str, Any] = {"content": content}
+    if input_data.created_at is not None:
+        body["created_at"] = _serialize_timestamp(input_data.created_at)
+    if input_data.updated_at is not None:
+        body["updated_at"] = _serialize_timestamp(input_data.updated_at)
+    return {"string": body}
+
+
 def _serialize_conversation_content(content: ConversationInput) -> dict[str, Any]:
     messages = []
     for msg in content.messages:
         m: dict[str, Any] = {"role": msg.role, "content": msg.content}
         if msg.created_at is not None:
-            m["created_at"] = msg.created_at
+            m["created_at"] = _serialize_timestamp(msg.created_at)
         if msg.tool_call_id is not None:
             m["tool_call_id"] = msg.tool_call_id
         if msg.name is not None:
@@ -66,9 +83,9 @@ def _serialize_conversation_content(content: ConversationInput) -> dict[str, Any
     if content.metadata is not None:
         conversation["metadata"] = content.metadata
     if content.created_at is not None:
-        conversation["created_at"] = content.created_at
+        conversation["created_at"] = _serialize_timestamp(content.created_at)
     if content.updated_at is not None:
-        conversation["updated_at"] = content.updated_at
+        conversation["updated_at"] = _serialize_timestamp(content.updated_at)
     return {"conversation": conversation}
 
 

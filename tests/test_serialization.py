@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta, timezone
+
 from engram._models import (
     ConversationInput,
     MessageInput,
@@ -94,6 +96,51 @@ def test_build_add_body_string_content_with_options() -> None:
     }
 
 
+def test_build_add_body_string_content_with_timestamps() -> None:
+    body = build_add_body(
+        StringInput(
+            content="hello world",
+            created_at="2024-01-01T00:00:00Z",
+            updated_at="2024-01-02T00:00:00Z",
+        ),
+        user_id=None,
+        group=None,
+    )
+    assert body == {
+        "input": {
+            "string": {
+                "content": ["hello world"],
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-02T00:00:00Z",
+            },
+        },
+    }
+
+
+def test_build_add_body_string_content_with_datetime_timestamps() -> None:
+    body = build_add_body(
+        StringInput(
+            content="hello world",
+            created_at=datetime(2024, 1, 1, tzinfo=UTC),
+            updated_at=datetime(2024, 1, 2, tzinfo=timezone(timedelta(hours=-5))),
+        ),
+        user_id=None,
+        group=None,
+    )
+    string_body = body["input"]["string"]
+    assert string_body["created_at"] == "2024-01-01T00:00:00Z"
+    assert string_body["updated_at"] == "2024-01-02T00:00:00-05:00"
+
+
+def test_build_add_body_string_content_naive_datetime_assumed_utc() -> None:
+    body = build_add_body(
+        StringInput(content="hello", created_at=datetime(2024, 1, 1)),
+        user_id=None,
+        group=None,
+    )
+    assert body["input"]["string"]["created_at"] == "2024-01-01T00:00:00Z"
+
+
 def test_build_add_body_conversation_content() -> None:
     messages = [
         MessageInput(role="user", content="hi"),
@@ -145,6 +192,25 @@ def test_build_add_body_conversation_content_with_message_timestamps() -> None:
     msg = body["input"]["conversation"]["messages"][0]
     assert msg["created_at"] == "2024-01-01T00:00:00Z"
     assert "tool_call_metadata" not in msg
+
+
+def test_build_add_body_conversation_content_with_datetime_timestamps() -> None:
+    messages = [
+        MessageInput(role="user", content="hi", created_at=datetime(2024, 1, 1, tzinfo=UTC))
+    ]
+    body = build_add_body(
+        ConversationInput(
+            messages=messages,
+            created_at=datetime(2024, 1, 1, tzinfo=UTC),
+            updated_at=datetime(2024, 1, 2, tzinfo=timezone(timedelta(hours=-5))),
+        ),
+        user_id=None,
+        group=None,
+    )
+    conv = body["input"]["conversation"]
+    assert conv["messages"][0]["created_at"] == "2024-01-01T00:00:00Z"
+    assert conv["created_at"] == "2024-01-01T00:00:00Z"
+    assert conv["updated_at"] == "2024-01-02T00:00:00-05:00"
 
 
 def test_build_add_body_conversation_content_with_tool_calls() -> None:
