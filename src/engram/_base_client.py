@@ -25,7 +25,7 @@ class _BaseClient:
             raise ValidationError("Timeout must be greater than 0.")
 
         normalized_base_url = base_url.rstrip("/")
-        default_headers = _build_headers(api_key=api_key, header_overrides=headers or {})
+        default_headers = _build_headers(api_key=api_key, extra_headers=headers or {})
 
         self._config = ClientConfig(
             base_url=normalized_base_url,
@@ -43,16 +43,24 @@ class _BaseClient:
         return dict(self._config.headers)
 
 
+CLIENT_ORIGIN_HEADER = "X-Engram-Client"
+SDK_CLIENT_TOKEN = f"python-sdk/{__version__}"
+
+
 def _build_headers(
     *,
     api_key: str,
-    header_overrides: Mapping[str, str],
+    extra_headers: Mapping[str, str],
 ) -> dict[str, str]:
-    headers: dict[str, str] = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "User-Agent": f"weaviate-engram/{__version__}",
-        "Authorization": f"Bearer {api_key}",
-    }
-    headers.update(header_overrides)
+    headers = dict(extra_headers)
+    headers.update(
+        {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        }
+    )
+
+    caller = extra_headers.get(CLIENT_ORIGIN_HEADER)
+    headers[CLIENT_ORIGIN_HEADER] = f"{caller} {SDK_CLIENT_TOKEN}" if caller else SDK_CLIENT_TOKEN
     return headers
