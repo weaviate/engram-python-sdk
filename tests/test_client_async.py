@@ -18,6 +18,7 @@ from engram._models import (
 )
 from engram.async_client import DEFAULT_BASE_URL, AsyncEngramClient
 from engram.errors import APIError, AuthenticationError, ValidationError
+from engram.version import __version__
 
 
 @pytest.mark.asyncio
@@ -29,6 +30,7 @@ async def test_async_client_defaults() -> None:
         assert client.default_headers["Accept"] == "application/json"
         assert client.default_headers["Content-Type"] == "application/json"
         assert client.default_headers["Authorization"] == "Bearer test-key"
+        assert client.default_headers["X-Engram-Client"] == f"python-sdk/{__version__}"
     finally:
         await client.aclose()
 

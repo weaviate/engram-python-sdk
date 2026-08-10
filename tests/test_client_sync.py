@@ -18,6 +18,7 @@ from engram._models import (
 )
 from engram.client import DEFAULT_BASE_URL, EngramClient
 from engram.errors import APIError, AuthenticationError, ValidationError
+from engram.version import __version__
 
 
 def test_client_defaults() -> None:
@@ -28,6 +29,21 @@ def test_client_defaults() -> None:
         assert client.default_headers["Accept"] == "application/json"
         assert client.default_headers["Content-Type"] == "application/json"
         assert client.default_headers["Authorization"] == "Bearer test-key"
+        assert client.default_headers["X-Engram-Client"] == f"python-sdk/{__version__}"
+    finally:
+        client.close()
+
+
+def test_client_origin_header_composition() -> None:
+    client = EngramClient(
+        api_key="test-key",
+        headers={"X-Engram-Client": "example-integration/1.2.3"},
+    )
+    try:
+        assert (
+            client.default_headers["X-Engram-Client"]
+            == f"example-integration/1.2.3 python-sdk/{__version__}"
+        )
     finally:
         client.close()
 
