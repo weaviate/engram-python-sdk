@@ -95,6 +95,10 @@ def parse_group(data: dict[str, Any]) -> Group:
             )
             for topic in data["topics"]
         ],
+        scoping=Scoping(
+            user_scoped=data["scoping"]["user_scoped"],
+            scope_properties=data["scoping"].get("scope_properties", []),
+        ),
     )
 
 

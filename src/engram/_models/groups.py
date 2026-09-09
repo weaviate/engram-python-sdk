@@ -20,3 +20,4 @@ class Group:
     group_id: str
     name: str
     topics: list[TopicDetails]
+    scoping: Scoping
