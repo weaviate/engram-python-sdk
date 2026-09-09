@@ -4,6 +4,8 @@ from ._builders import (
     build_search_body,
 )
 from ._parsers import (
+    parse_group,
+    parse_group_list,
     parse_memory,
     parse_run,
     parse_run_status,
@@ -18,4 +20,6 @@ __all__ = [
     "parse_run",
     "parse_run_status",
     "parse_search_results",
+    "parse_group",
+    "parse_group_list",
 ]
