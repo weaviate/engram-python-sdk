@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta, timezone
+from typing import Any
 
 from engram._models import (
     ConversationInput,
@@ -549,82 +550,24 @@ def test_parse_run_status_with_error() -> None:
 # ── parse_group ─────────────────────────────────────────────────────────
 
 
-SAMPLE_GROUP = {
-    "group_id": "11111111-2222-3333-4444-555555555555",
-    "name": "default",
-    "scoping": {"user_scoped": True, "scope_properties": ["account_id"]},
-    "topics": [
-        {
-            "topic_name": "facts",
-            "description": "General facts about the user",
-            "is_bounded": False,
-            "scoping": {"user_scoped": True, "scope_properties": ["account_id"]},
-        },
-        {
-            "topic_name": "preferences",
-            "description": "",
-            "is_bounded": True,
-            "scoping": {"user_scoped": False},
-        },
-    ],
-}
-
-
-def test_parse_group() -> None:
-    group = parse_group(SAMPLE_GROUP)
+def test_parse_group(sample_group_response: dict[str, Any]) -> None:
+    group = parse_group(sample_group_response)
     assert group.group_id == "11111111-2222-3333-4444-555555555555"
     assert group.name == "default"
     assert group.scoping == Scoping(user_scoped=True, scope_properties=["account_id"])
-    assert [t.name for t in group.topics] == ["facts", "preferences"]
+    assert [t.name for t in group.topics] == ["facts"]
     assert group.topics[0].is_bounded is False
     assert group.topics[0].scoping.scope_properties == ["account_id"]
 
 
-def test_parse_group_omitted_scope_properties() -> None:
-    group = parse_group(SAMPLE_GROUP)
-    assert group.topics[1].scoping == Scoping(user_scoped=False, scope_properties=[])
+def test_parse_group_omitted_scope_properties(support_group_response: dict[str, Any]) -> None:
+    group = parse_group(support_group_response)
+    assert group.scoping == Scoping(user_scoped=False, scope_properties=[])
+    assert group.topics[0].scoping == Scoping(user_scoped=False, scope_properties=[])
 
 
-SAMPLE_GROUP_LIST = {
-    "groups": [
-        {
-            "group_id": "11111111-2222-3333-4444-555555555555",
-            "name": "default",
-            "scoping": {
-                "user_scoped": True,
-                "scope_properties": ["account_id"],
-            },
-            "topics": [
-                {
-                    "topic_name": "facts",
-                    "description": "General facts about the user",
-                    "is_bounded": False,
-                    "scoping": {
-                        "user_scoped": True,
-                        "scope_properties": ["account_id"],
-                    },
-                }
-            ],
-        },
-        {
-            "group_id": "66666666-7777-8888-9999-000000000000",
-            "name": "support",
-            "scoping": {"user_scoped": False},
-            "topics": [
-                {
-                    "topic_name": "tickets",
-                    "description": "Support tickets",
-                    "is_bounded": True,
-                    "scoping": {"user_scoped": False},
-                }
-            ],
-        },
-    ],
-}
-
-
-def test_parse_group_list() -> None:
-    groups = parse_group_list(SAMPLE_GROUP_LIST)
+def test_parse_group_list(sample_group_list_response: dict[str, Any]) -> None:
+    groups = parse_group_list(sample_group_list_response)
     assert [g.name for g in groups] == ["default", "support"]
     assert groups[1].group_id == "66666666-7777-8888-9999-000000000000"
     assert groups[1].topics[0].is_bounded is True
