@@ -13,6 +13,7 @@ def test_public_imports() -> None:
         EngramError,
         EngramTimeoutError,
         FetchRetrieval,
+        Group,
         HybridRetrieval,
         Memory,
         MessageInput,
@@ -22,12 +23,14 @@ def test_public_imports() -> None:
         RetrievalConfigModel,
         Run,
         RunStatus,
+        Scoping,
         SearchResults,
         StringInput,
         ToolCallCustomInput,
         ToolCallFuncInput,
         ToolCallInput,
         Topic,
+        TopicDetails,
         ValidationError,
         VectorRetrieval,
     )
@@ -58,6 +61,9 @@ def test_public_imports() -> None:
     assert isinstance(ToolCallFuncInput, type)
     assert isinstance(ToolCallInput, type)
     assert isinstance(Topic, type)
+    assert isinstance(Group, type)
+    assert isinstance(Scoping, type)
+    assert isinstance(TopicDetails, type)
 
     expected_exports = {
         "APIError",
@@ -72,6 +78,7 @@ def test_public_imports() -> None:
         "EngramError",
         "EngramTimeoutError",
         "FetchRetrieval",
+        "Group",
         "HybridRetrieval",
         "Memory",
         "MessageInput",
@@ -81,12 +88,14 @@ def test_public_imports() -> None:
         "RetrievalConfigModel",
         "Run",
         "RunStatus",
+        "Scoping",
         "SearchResults",
         "StringInput",
         "ToolCallCustomInput",
         "ToolCallFuncInput",
         "ToolCallInput",
         "Topic",
+        "TopicDetails",
         "ValidationError",
         "VectorRetrieval",
         "__version__",

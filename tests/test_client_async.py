@@ -71,6 +71,7 @@ def test_async_client_has_sub_resources() -> None:
     client = AsyncEngramClient(api_key="test-key")
     assert hasattr(client, "memories")
     assert hasattr(client, "runs")
+    assert hasattr(client, "groups")
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
@@ -88,6 +89,7 @@ def _make_client(
     client._transport = transport
     client.memories._transport = transport
     client.runs._transport = transport
+    client.groups._transport = transport
     return client
 
 
@@ -103,6 +105,7 @@ def _make_client_with_handler(
     client._transport = transport
     client.memories._transport = transport
     client.runs._transport = transport
+    client.groups._transport = transport
     return client
 
 
@@ -454,6 +457,79 @@ async def test_get_run() -> None:
     assert result.run_id == "r1"
     assert result.status == "completed"
     assert len(result.memories_created) == 1
+
+
+# ── groups ──────────────────────────────────────────────────────────────
+
+SAMPLE_GROUP_RESPONSE: dict[str, Any] = {
+    "group_id": "11111111-2222-3333-4444-555555555555",
+    "name": "default",
+    "scoping": {"user_scoped": True, "scope_properties": ["account_id"]},
+    "topics": [
+        {
+            "topic_name": "facts",
+            "description": "General facts about the user",
+            "is_bounded": False,
+            "scoping": {"user_scoped": True, "scope_properties": ["account_id"]},
+        }
+    ],
+}
+
+
+SAMPLE_GROUP_LIST_RESPONSE: dict[str, Any] = {
+    "groups": [
+        {
+            "group_id": "11111111-2222-3333-4444-555555555555",
+            "name": "default",
+            "scoping": {
+                "user_scoped": True,
+                "scope_properties": ["account_id"],
+            },
+            "topics": [
+                {
+                    "topic_name": "facts",
+                    "description": "General facts about the user",
+                    "is_bounded": False,
+                    "scoping": {
+                        "user_scoped": True,
+                        "scope_properties": ["account_id"],
+                    },
+                }
+            ],
+        },
+        {
+            "group_id": "66666666-7777-8888-9999-000000000000",
+            "name": "support",
+            "scoping": {"user_scoped": False},
+            "topics": [
+                {
+                    "topic_name": "tickets",
+                    "description": "Support tickets",
+                    "is_bounded": True,
+                    "scoping": {"user_scoped": False},
+                }
+            ],
+        },
+    ],
+}
+
+
+@pytest.mark.asyncio
+async def test_list_groups() -> None:
+    client = _make_client(body=SAMPLE_GROUP_LIST_RESPONSE)
+    groups = await client.groups.list()
+    assert [g.name for g in groups] == ["default", "support"]
+    assert groups[0].topics[0].name == "facts"
+    assert groups[1].group_id == "66666666-7777-8888-9999-000000000000"
+    assert groups[1].topics[0].is_bounded is True
+
+
+@pytest.mark.asyncio
+async def test_get_group() -> None:
+    client = _make_client(body=SAMPLE_GROUP_RESPONSE)
+    group = await client.groups.get("default")
+    assert group.name == "default"
+    assert group.scoping.user_scoped is True
 
 
 # ── Error handling ──────────────────────────────────────────────────────
