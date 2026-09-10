@@ -488,7 +488,7 @@ async def test_list_groups_sends_request_path(
 
 
 @pytest.mark.asyncio
-async def test_get_group_sends_name_param(sample_group_response: dict[str, Any]) -> None:
+async def test_get_group_sends_group_param(sample_group_response: dict[str, Any]) -> None:
     captured: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -498,8 +498,8 @@ async def test_get_group_sends_name_param(sample_group_response: dict[str, Any])
     client = _make_client_with_handler(handler)
     group = await client.groups.get("default")
     url = captured[0].url
-    assert url.path == "/v1/groups/by-name"
-    assert url.params["name"] == "default"
+    assert url.path == "/v1/groups/resolve"
+    assert url.params["group"] == "default"
     assert group.name == "default"
     assert group.scoping.user_scoped is True
 
@@ -516,7 +516,7 @@ async def test_get_group_empty_name_sends_param(
 
     client = _make_client_with_handler(handler)
     await client.groups.get("")
-    assert captured[0].url.params["name"] == ""
+    assert captured[0].url.params["group"] == ""
 
 
 @pytest.mark.asyncio
@@ -531,7 +531,7 @@ async def test_get_group_without_name_omits_param(
 
     client = _make_client_with_handler(handler)
     await client.groups.get()
-    assert "name" not in captured[0].url.params
+    assert "group" not in captured[0].url.params
 
 
 # ── Error handling ──────────────────────────────────────────────────────

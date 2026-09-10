@@ -7,7 +7,7 @@ from .._models import Group
 from .._serialization import parse_group, parse_group_list
 
 _GROUPS_PATH = "/v1/groups"
-_GET_PATH = f"{_GROUPS_PATH}/by-name"
+_GET_PATH = f"{_GROUPS_PATH}/resolve"
 
 
 class Groups:
@@ -16,8 +16,8 @@ class Groups:
     def __init__(self, transport: HttpTransport) -> None:
         self._transport = transport
 
-    def get(self, name: str | None = None) -> Group:
-        params = {"name": name} if name is not None else None
+    def get(self, group: str | None = None) -> Group:
+        params = {"group": group} if group is not None else None
         data = self._transport.request("GET", _GET_PATH, params=params)
         return parse_group(data)
 
@@ -32,8 +32,8 @@ class AsyncGroups:
     def __init__(self, transport: AsyncHttpTransport) -> None:
         self._transport = transport
 
-    async def get(self, name: str | None = None) -> Group:
-        params = {"name": name} if name is not None else None
+    async def get(self, group: str | None = None) -> Group:
+        params = {"group": group} if group is not None else None
         data = await self._transport.request("GET", _GET_PATH, params=params)
         return parse_group(data)
 
