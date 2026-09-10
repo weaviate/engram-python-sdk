@@ -79,26 +79,28 @@ def parse_run_status(data: dict[str, Any]) -> RunStatus:
     )
 
 
+def _parse_scoping(data: dict[str, Any]) -> Scoping:
+    return Scoping(
+        user_scoped=data["user_scoped"],
+        scope_properties=data.get("scope_properties", []),
+    )
+
+
+def _parse_topic(data: dict[str, Any]) -> TopicDetails:
+    return TopicDetails(
+        name=data["topic_name"],
+        description=data["description"],
+        is_bounded=data["is_bounded"],
+        scoping=_parse_scoping(data["scoping"]),
+    )
+
+
 def parse_group(data: dict[str, Any]) -> Group:
     return Group(
         group_id=data["group_id"],
         name=data["name"],
-        topics=[
-            TopicDetails(
-                name=topic["topic_name"],
-                description=topic["description"],
-                is_bounded=topic["is_bounded"],
-                scoping=Scoping(
-                    user_scoped=topic["scoping"]["user_scoped"],
-                    scope_properties=topic["scoping"].get("scope_properties", []),
-                ),
-            )
-            for topic in data["topics"]
-        ],
-        scoping=Scoping(
-            user_scoped=data["scoping"]["user_scoped"],
-            scope_properties=data["scoping"].get("scope_properties", []),
-        ),
+        topics=[_parse_topic(topic) for topic in data["topics"]],
+        scoping=_parse_scoping(data["scoping"]),
     )
 
 
