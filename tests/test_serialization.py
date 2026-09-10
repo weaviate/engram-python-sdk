@@ -1,10 +1,12 @@
 from datetime import UTC, datetime, timedelta, timezone
+from typing import Any
 
 from engram._models import (
     ConversationInput,
     MessageInput,
     PreExtractedInput,
     PreExtractedItem,
+    Scoping,
     StringInput,
     ToolCallCustomInput,
     ToolCallFuncInput,
@@ -16,6 +18,8 @@ from engram._serialization import (
     build_add_body,
     build_memory_params,
     build_search_body,
+    parse_group,
+    parse_group_list,
     parse_memory,
     parse_run,
     parse_run_status,
@@ -541,3 +545,33 @@ def test_parse_run_status_with_error() -> None:
     data = {**SAMPLE_RUN_STATUS, "status": "failed", "error": "boom"}
     result = parse_run_status(data)
     assert result.error == "boom"
+
+
+# ── parse_group ─────────────────────────────────────────────────────────
+
+
+def test_parse_group(sample_group_response: dict[str, Any]) -> None:
+    group = parse_group(sample_group_response)
+    assert group.group_id == "11111111-2222-3333-4444-555555555555"
+    assert group.name == "default"
+    assert group.scoping == Scoping(user_scoped=True, scope_properties=["account_id"])
+    assert [t.name for t in group.topics] == ["facts"]
+    assert group.topics[0].is_bounded is False
+    assert group.topics[0].scoping.scope_properties == ["account_id"]
+
+
+def test_parse_group_omitted_scope_properties(support_group_response: dict[str, Any]) -> None:
+    group = parse_group(support_group_response)
+    assert group.scoping == Scoping(user_scoped=False, scope_properties=[])
+    assert group.topics[0].scoping == Scoping(user_scoped=False, scope_properties=[])
+
+
+def test_parse_group_list(sample_group_list_response: dict[str, Any]) -> None:
+    groups = parse_group_list(sample_group_list_response)
+    assert [g.name for g in groups] == ["default", "support"]
+    assert groups[1].group_id == "66666666-7777-8888-9999-000000000000"
+    assert groups[1].topics[0].is_bounded is True
+
+
+def test_parse_group_list_empty() -> None:
+    assert parse_group_list({"groups": []}) == []

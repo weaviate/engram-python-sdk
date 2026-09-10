@@ -1,3 +1,4 @@
+from .groups import Group, Scoping, TopicDetails
 from .memory import (
     AddInput,
     BM25Retrieval,
@@ -28,6 +29,7 @@ __all__ = [
     "CommittedOperations",
     "ConversationInput",
     "FetchRetrieval",
+    "Group",
     "HybridRetrieval",
     "Memory",
     "MessageInput",
@@ -37,12 +39,14 @@ __all__ = [
     "RetrievalConfigModel",
     "Run",
     "RunStatus",
+    "Scoping",
     "SearchResults",
     "StringInput",
     "ToolCallCustomInput",
     "ToolCallFuncInput",
     "ToolCallInput",
     "Topic",
+    "TopicDetails",
     "TopicSelector",
     "VectorRetrieval",
 ]

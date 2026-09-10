@@ -4,7 +4,7 @@ from collections.abc import Mapping
 
 from ._base_client import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, _BaseClient
 from ._http import HttpTransport
-from ._resources import Memories, Runs
+from ._resources import Groups, Memories, Runs
 
 __all__ = ["DEFAULT_BASE_URL", "DEFAULT_TIMEOUT", "EngramClient"]
 
@@ -13,6 +13,7 @@ class EngramClient(_BaseClient):
     """Synchronous Engram client."""
 
     _transport: HttpTransport
+    groups: Groups
     memories: Memories
     runs: Runs
 
@@ -31,6 +32,7 @@ class EngramClient(_BaseClient):
             timeout=timeout,
         )
         self._transport = HttpTransport(self._config)
+        self.groups = Groups(self._transport)
         self.memories = Memories(self._transport)
         self.runs = Runs(self._transport)
 

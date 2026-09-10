@@ -5,10 +5,13 @@ from typing import Any
 from .._models import (
     CommittedOperation,
     CommittedOperations,
+    Group,
     Memory,
     Run,
     RunStatus,
+    Scoping,
     SearchResults,
+    TopicDetails,
 )
 
 
@@ -74,3 +77,32 @@ def parse_run_status(data: dict[str, Any]) -> RunStatus:
         error=data.get("error"),
         user_id=data.get("user_id"),
     )
+
+
+def _parse_scoping(data: dict[str, Any]) -> Scoping:
+    return Scoping(
+        user_scoped=data["user_scoped"],
+        scope_properties=data.get("scope_properties", []),
+    )
+
+
+def _parse_topic(data: dict[str, Any]) -> TopicDetails:
+    return TopicDetails(
+        name=data["topic_name"],
+        description=data["description"],
+        is_bounded=data["is_bounded"],
+        scoping=_parse_scoping(data["scoping"]),
+    )
+
+
+def parse_group(data: dict[str, Any]) -> Group:
+    return Group(
+        group_id=data["group_id"],
+        name=data["name"],
+        topics=[_parse_topic(topic) for topic in data["topics"]],
+        scoping=_parse_scoping(data["scoping"]),
+    )
+
+
+def parse_group_list(data: dict[str, Any]) -> list[Group]:
+    return [parse_group(group) for group in data["groups"]]
