@@ -17,7 +17,7 @@ class Groups:
         self._transport = transport
 
     def get(self, name: str | None = None) -> Group:
-        params = {"name": name} if name else None
+        params = {"name": name} if name is not None else None
         data = self._transport.request("GET", _GET_PATH, params=params)
         return parse_group(data)
 
@@ -33,7 +33,7 @@ class AsyncGroups:
         self._transport = transport
 
     async def get(self, name: str | None = None) -> Group:
-        params = {"name": name} if name else None
+        params = {"name": name} if name is not None else None
         data = await self._transport.request("GET", _GET_PATH, params=params)
         return parse_group(data)
 
