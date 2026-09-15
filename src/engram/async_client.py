@@ -4,7 +4,7 @@ from collections.abc import Mapping
 
 from ._base_client import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, _BaseClient
 from ._http import AsyncHttpTransport
-from ._resources import AsyncMemories, AsyncRuns
+from ._resources import AsyncGroups, AsyncMemories, AsyncRuns
 
 __all__ = ["DEFAULT_BASE_URL", "DEFAULT_TIMEOUT", "AsyncEngramClient"]
 
@@ -13,6 +13,7 @@ class AsyncEngramClient(_BaseClient):
     """Asynchronous Engram client."""
 
     _transport: AsyncHttpTransport
+    groups: AsyncGroups
     memories: AsyncMemories
     runs: AsyncRuns
 
@@ -31,6 +32,7 @@ class AsyncEngramClient(_BaseClient):
             timeout=timeout,
         )
         self._transport = AsyncHttpTransport(self._config)
+        self.groups = AsyncGroups(self._transport)
         self.memories = AsyncMemories(self._transport)
         self.runs = AsyncRuns(self._transport)
 

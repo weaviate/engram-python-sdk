@@ -71,6 +71,7 @@ def test_async_client_has_sub_resources() -> None:
     client = AsyncEngramClient(api_key="test-key")
     assert hasattr(client, "memories")
     assert hasattr(client, "runs")
+    assert hasattr(client, "groups")
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────
@@ -88,6 +89,7 @@ def _make_client(
     client._transport = transport
     client.memories._transport = transport
     client.runs._transport = transport
+    client.groups._transport = transport
     return client
 
 
@@ -103,6 +105,7 @@ def _make_client_with_handler(
     client._transport = transport
     client.memories._transport = transport
     client.runs._transport = transport
+    client.groups._transport = transport
     return client
 
 
@@ -454,6 +457,81 @@ async def test_get_run() -> None:
     assert result.run_id == "r1"
     assert result.status == "completed"
     assert len(result.memories_created) == 1
+
+
+# ── groups ──────────────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_list_groups(sample_group_list_response: dict[str, Any]) -> None:
+    client = _make_client(body=sample_group_list_response)
+    groups = await client.groups.list()
+    assert [g.name for g in groups] == ["default", "support"]
+    assert groups[0].topics[0].name == "facts"
+    assert groups[1].group_id == "66666666-7777-8888-9999-000000000000"
+    assert groups[1].topics[0].is_bounded is True
+
+
+@pytest.mark.asyncio
+async def test_list_groups_sends_request_path(
+    sample_group_list_response: dict[str, Any],
+) -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json=sample_group_list_response)
+
+    client = _make_client_with_handler(handler)
+    await client.groups.list()
+    assert captured[0].url.path == "/v1/groups"
+
+
+@pytest.mark.asyncio
+async def test_get_group_sends_group_param(sample_group_response: dict[str, Any]) -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json=sample_group_response)
+
+    client = _make_client_with_handler(handler)
+    group = await client.groups.get("default")
+    url = captured[0].url
+    assert url.path == "/v1/groups/resolve"
+    assert url.params["group"] == "default"
+    assert group.name == "default"
+    assert group.scoping.user_scoped is True
+
+
+@pytest.mark.asyncio
+async def test_get_group_empty_name_sends_param(
+    sample_group_response: dict[str, Any],
+) -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json=sample_group_response)
+
+    client = _make_client_with_handler(handler)
+    await client.groups.get("")
+    assert captured[0].url.params["group"] == ""
+
+
+@pytest.mark.asyncio
+async def test_get_group_without_name_omits_param(
+    sample_group_response: dict[str, Any],
+) -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(200, json=sample_group_response)
+
+    client = _make_client_with_handler(handler)
+    await client.groups.get()
+    assert "group" not in captured[0].url.params
 
 
 # ── Error handling ──────────────────────────────────────────────────────
