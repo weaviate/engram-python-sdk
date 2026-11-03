@@ -1,3 +1,6 @@
+> [!WARNING]
+> **We have decided to sunset Engram. Existing projects will continue to work until December 31st.**
+
 <img src="https://raw.githubusercontent.com/weaviate/engram-python-sdk/main/docs/assets/weaviate-logo.png" alt="Weaviate" width="140" align="right" />
 
 # weaviate-engram
